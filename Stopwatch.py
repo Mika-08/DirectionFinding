@@ -32,7 +32,10 @@ class Stopwatch:
         self.elapsed_time = timedelta()
 
     def get_elapsed_time(self):
-
+        """
+        Get the elapsed time
+        :return: The elapsed time
+        """
         if self.is_running:
             return self.elapsed_time + (datetime.now() - self.start_time)
         else:
