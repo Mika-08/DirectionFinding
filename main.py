@@ -11,7 +11,8 @@ running = True
 while running:
     gui.draw_dynamic()
     pygame.display.update()
-    gui.handle_events()
+    if not gui.handle_events():
+        running = False
 
 pygame.quit()
 

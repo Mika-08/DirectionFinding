@@ -12,7 +12,7 @@ class GUI:
         self.SCREEN = None
 
         self.stopwatch = Stopwatch.Stopwatch()
-
+        self.stopwatch_is_enabled = False
 
         pygame.font.init()
         self.MAIN_FONT = 'freesansbold.ttf'
@@ -197,13 +197,15 @@ class GUI:
         elif start_stop_box.collidepoint(mouse_pos):
             self.stopwatch.start_stop()
 
-    def check_buttons(self, mouse_pos):
+    def check_buttons(self, mouse_pos, ):
         """
         Function for checking if a button is clicked
         :param mouse_pos: position of the mouse
         :return: Nothing
         """
-        self.check_stopwatch_buttons(mouse_pos)
+
+        if self.stopwatch_is_enabled:
+            self.check_stopwatch_buttons(mouse_pos)
 
     def handle_events(self):
         """
@@ -227,4 +229,9 @@ class GUI:
         self.SCREEN.fill(self.COLORS.get('black'))
         self.make_radar_circles()
         self.make_radar_lines()
-        self.make_time_block(True)
+
+        # Show or not show the stopwatch
+        if self.stopwatch_is_enabled:
+            self.make_time_block(True)
+        elif not self.stopwatch_is_enabled:
+            self.make_time_block(False)
