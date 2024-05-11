@@ -14,8 +14,9 @@ class GUI:
 
         self.stopwatch = Stopwatch.Stopwatch()
         self.stopwatch_is_enabled = True
+        self.tracking_is_enabled = True
 
-        self.menu = False
+        self.menu = True
 
         pygame.font.init()
         self.MAIN_FONT = 'freesansbold.ttf'
@@ -39,6 +40,8 @@ class GUI:
         self.start_stop_button = None
         self.menu_button = None
         self.back_button = None
+        self.tracking_button = None
+        self.stopwatch_button = None
 
         # Pictograms
         self.menu_image = pygame.image.load("images/menu_white.PNG")
@@ -252,19 +255,36 @@ class GUI:
         rect_tracking = pygame.Rect(rectangle_x + 670 / self.SCALING, rectangle_y + 50 / self.SCALING,
                                     120 / self.SCALING, 45 / self.SCALING)
 
+        self.tracking_button = rect_tracking
+
         rect_stopwatch = pygame.Rect(rectangle_x + 670 / self.SCALING, rectangle_y + 200 / self.SCALING,
                                      120 / self.SCALING, 45 / self.SCALING)
 
-        rect_tracking_dot = pygame.Rect(rectangle_x + 670 / self.SCALING, rectangle_y + 50 / self.SCALING,
-                                    120 / self.SCALING, 45 / self.SCALING)
+        self.stopwatch_button = rect_stopwatch
 
-        rect_stopwatch_dot = pygame.Rect(rectangle_x + 670 / self.SCALING, rectangle_y + 200 / self.SCALING,
-                                     120 / self.SCALING, 45 / self.SCALING)
+        tracking_dot_x_pos = 265
+        tracking_dot_color = self.COLORS.get('red')
+        if self.tracking_is_enabled:
+            tracking_dot_x_pos = 300
+            tracking_dot_color = self.COLORS.get('green')
 
+        rect_tracking_dot = pygame.Rect(tracking_dot_x_pos + 575 / self.SCALING,
+                                        rectangle_y + 57 / self.SCALING, 40 / self.SCALING, 32 / self.SCALING)
+
+        stopwatch_dot_x_pos = 265
+        stopwatch_dot_color = self.COLORS.get('red')
+        if self.stopwatch_is_enabled:
+            stopwatch_dot_x_pos = 300
+            stopwatch_dot_color = self.COLORS.get('green')
+
+        rect_stopwatch_dot = pygame.Rect(stopwatch_dot_x_pos + 575 / self.SCALING, rectangle_y + 207 / self.SCALING,
+                                     40 / self.SCALING, 32 / self.SCALING)
 
         if self.menu:
             pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect_tracking, width=3, border_radius=20)
             pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect_stopwatch, width=3, border_radius=20)
+            pygame.draw.rect(self.SCREEN, tracking_dot_color, rect_tracking_dot, border_radius=20)
+            pygame.draw.rect(self.SCREEN, stopwatch_dot_color, rect_stopwatch_dot, border_radius=20)
 
 
     def make_back_button(self):
@@ -301,14 +321,29 @@ class GUI:
         :return: Nothing
         """
 
-        if self.menu_button.collidepoint(mouse_pos) and not self.menu:
-            self.menu = True
+        if self.menu:
+            if self.back_button.collidepoint(mouse_pos):
+                self.menu = False
 
-        elif self.back_button.collidepoint(mouse_pos) and self.menu:
-            self.menu = False
+            if self.tracking_button.collidepoint(mouse_pos) and self.tracking_is_enabled:
+                self.tracking_is_enabled = False
 
-        if self.stopwatch_is_enabled and not self.menu:
-            self.check_stopwatch_buttons(mouse_pos)
+            elif self.tracking_button.collidepoint(mouse_pos) and not self.tracking_is_enabled:
+                self.tracking_is_enabled = True
+
+            if self.stopwatch_button.collidepoint(mouse_pos) and self.stopwatch_is_enabled:
+                self.stopwatch_is_enabled = False
+
+            elif self.stopwatch_button.collidepoint(mouse_pos) and not self.stopwatch_is_enabled:
+                self.stopwatch_is_enabled = True
+
+
+        elif not self.menu:
+            if self.menu_button.collidepoint(mouse_pos):
+                self.menu = True
+
+            if self.stopwatch_is_enabled:
+                self.check_stopwatch_buttons(mouse_pos)
 
     def handle_events(self):
         """
