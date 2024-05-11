@@ -13,6 +13,7 @@ class GUI:
 
         self.stopwatch = Stopwatch.Stopwatch()
 
+
         pygame.font.init()
         self.MAIN_FONT = 'freesansbold.ttf'
         self.FONTS = {
@@ -29,6 +30,11 @@ class GUI:
             "red": (240, 84, 79),
             "white": (255, 250, 255)
         }
+
+        # Buttons
+        self.reset_button = None
+        self.start_stop_button = None
+        self.home_button = None
 
         # Radar properties
         self.radar_radius = 500 / self.SCALING
@@ -109,55 +115,108 @@ class GUI:
         # Add to the screen
         self.SCREEN.blit(text_time_surface, text_time_rect)
 
+        # Add the outline and the stopwatch function when the stopwatch is enabled
         if stopwatch:
-            # Rectangle outline
-            rect = pygame.Rect(rectangle_x, rectangle_y, 370 / self.SCALING, 260 / self.SCALING)
+            self.make_stopwatch(rectangle_x, rectangle_y)
 
-            # Stopwatch time
-            stopwatch_time_str = str(self.stopwatch.get_elapsed_time()).split('.')[0]
-            stopwatch_text_surface = self.FONTS.get('stopwatch_font').render(f"Stopwatch: {stopwatch_time_str}",
-                                                                             True, self.COLORS.get('white'))
-            stopwatch_text_rect = stopwatch_text_surface.get_rect()
-            stopwatch_text_rect.topleft = (rectangle_x + 45 / self.SCALING, rectangle_y + 100 / self.SCALING)
+    def make_stopwatch(self, rectangle_x, rectangle_y):
+        """
+        Method to call if the stopwatch feature is turned on
+        :return: Nothing
+        """
 
-            # Stopwatch buttons
-            reset_text = self.FONTS.get('stopwatch_font').render("Reset", True, self.COLORS.get('white'))
+        # Rectangle outline
+        rect = pygame.Rect(rectangle_x, rectangle_y, 370 / self.SCALING, 260 / self.SCALING)
 
-            # Change the start stop button text dynamically
-            start_stop_button_text = "Start"
-            if self.stopwatch.is_running:
-                start_stop_button_text = "Stop"
+        # Stopwatch time
+        stopwatch_time_str = str(self.stopwatch.get_elapsed_time()).split('.')[0]
+        stopwatch_text_surface = self.FONTS.get('stopwatch_font').render(f"Stopwatch: {stopwatch_time_str}",
+                                                                         True, self.COLORS.get('white'))
+        stopwatch_text_rect = stopwatch_text_surface.get_rect()
+        stopwatch_text_rect.topleft = (rectangle_x + 45 / self.SCALING, rectangle_y + 100 / self.SCALING)
 
-            start_stop_text = self.FONTS.get('stopwatch_font').render(f"{start_stop_button_text}", True,
-                                                                      self.COLORS.get('white'))
+        # Stopwatch buttons
+        reset_text = self.FONTS.get('stopwatch_font').render("Reset", True, self.COLORS.get('white'))
 
-            reset_rect = reset_text.get_rect()
-            reset_rect.center = (rectangle_x + (45 + 50) / self.SCALING, rectangle_y + 200 / self.SCALING)
-            start_stop_rect = start_stop_text.get_rect()
-            start_stop_rect.center = (rectangle_x + (45 + 210) / self.SCALING, rectangle_y + 200 / self.SCALING)
+        # Change the start stop button text dynamically
+        start_stop_button_text = "Start"
+        start_stop_color = self.COLORS.get('green')
+        if self.stopwatch.is_running:
+            start_stop_button_text = "Stop"
+            start_stop_color = self.COLORS.get('red')
 
-            # Make outlines for the buttons
-            reset_outline = (reset_rect[0] - 20, reset_rect[1] - 15,
-                             160 / self.SCALING, 80 / self.SCALING)
-            start_stop_outline = (start_stop_rect[0] - 20, start_stop_rect[1] - 15,
-                                  160 / self.SCALING, 80 / self.SCALING)
+        start_stop_text = self.FONTS.get('stopwatch_font').render(f"{start_stop_button_text}", True,
+                                                                  self.COLORS.get('white'))
 
-            # Add to the screen
+        reset_rect = reset_text.get_rect()
+        reset_rect.center = (rectangle_x + (45 + 60) / self.SCALING, rectangle_y + 200 / self.SCALING)
+        start_stop_rect = start_stop_text.get_rect()
+        start_stop_rect.center = (rectangle_x + (45 + 230) / self.SCALING, rectangle_y + 200 / self.SCALING)
 
-            # Draw the outline rectangle
-            pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect, width=3, border_radius=30)
+        # Make outlines for the buttons
+        x_pos_reset = reset_rect[0] - 35 / self.SCALING
+        y_pos_reset = reset_rect[1] - 21 / self.SCALING
+        x_pos_start_stop = start_stop_rect[0] - 42 / self.SCALING
+        y_pos_start_stop = start_stop_rect[1] - 21 / self.SCALING
 
-            # Draw the stopwatch text
-            self.SCREEN.blit(stopwatch_text_surface, stopwatch_text_rect)
+        self.reset_button = (x_pos_reset, y_pos_reset,
+                         160 / self.SCALING, 75 / self.SCALING)
+        self.start_stop_button = (x_pos_start_stop, y_pos_start_stop,
+                              160 / self.SCALING, 75 / self.SCALING)
 
-            # Draw the button text
-            self.SCREEN.blit(reset_text, reset_rect)
-            self.SCREEN.blit(start_stop_text, start_stop_rect)
+        # Add to the screen
+        # Draw the outline rectangle
+        pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect, width=3, border_radius=30)
 
-            # Draw the outlines
-            pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), reset_outline, width=3, border_radius=20)
-            pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), start_stop_outline, width=3, border_radius=20)
+        # Draw the stopwatch text
+        self.SCREEN.blit(stopwatch_text_surface, stopwatch_text_rect)
 
+        # Fill the inside
+        pygame.draw.rect(self.SCREEN, start_stop_color, self.start_stop_button, border_radius=20)
+
+        # Draw the outlines
+        pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), self.reset_button, width=3, border_radius=20)
+        pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), self.start_stop_button, width=3, border_radius=20)
+
+        # Draw the button text
+        self.SCREEN.blit(reset_text, reset_rect)
+        self.SCREEN.blit(start_stop_text, start_stop_rect)
+
+    def check_stopwatch_buttons(self, mouse_pos):
+        """
+        Check is the stopwatch buttons are clicked
+        :param mouse_pos: position of the mouse
+        :return: Nothing
+        """
+        # Make the hit boxes for the stop watch buttons
+        reset_box = pygame.Rect(self.reset_button)
+        start_stop_box = pygame.Rect(self.start_stop_button)
+
+        if reset_box.collidepoint(mouse_pos):
+            self.stopwatch.reset()
+        elif start_stop_box.collidepoint(mouse_pos):
+            self.stopwatch.start_stop()
+
+    def check_buttons(self, mouse_pos):
+        """
+        Function for checking if a button is clicked
+        :param mouse_pos: position of the mouse
+        :return: Nothing
+        """
+        self.check_stopwatch_buttons(mouse_pos)
+
+    def handle_events(self):
+        """
+        Event handler
+        :return: Nothing
+        """
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                self.check_buttons(mouse_pos)
+        return True
 
     def draw_dynamic(self):
         """
