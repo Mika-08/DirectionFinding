@@ -3,7 +3,7 @@ import numpy as np
 from datetime import datetime
 
 import Stopwatch
-
+import Tracking
 
 class GUI:
     def __init__(self):
@@ -13,10 +13,12 @@ class GUI:
         self.SCREEN = None
 
         self.stopwatch = Stopwatch.Stopwatch()
+        self.tracking = Tracking.Tracking(self.SCALING)
+
         self.stopwatch_is_enabled = True
         self.tracking_is_enabled = True
 
-        self.menu = True
+        self.menu = False
 
         pygame.font.init()
         self.MAIN_FONT = 'freesansbold.ttf'
@@ -106,6 +108,13 @@ class GUI:
             end_point_y = self.radar_circle_center[1] + np.cos(angle_rad) * self.radar_radius
             pygame.draw.line(self.SCREEN, self.COLORS.get('green'), self.radar_circle_center,
                              (int(end_point_x), int(end_point_y)), width=6)
+
+    def make_tracker(self):
+        tracker_x_pos, tracker_y_pos = self.tracking.make_coordinates()
+        tracker_center = (tracker_x_pos + self.radar_circle_center[0], tracker_y_pos + self.radar_circle_center[1])
+        tracker_radius = 25 / self.SCALING
+
+        pygame.draw.circle(self.SCREEN, self.COLORS.get('red'), tracker_center, tracker_radius)
 
     def make_time_block(self, stopwatch):
         """
@@ -278,14 +287,13 @@ class GUI:
             stopwatch_dot_color = self.COLORS.get('green')
 
         rect_stopwatch_dot = pygame.Rect(stopwatch_dot_x_pos + 575 / self.SCALING, rectangle_y + 207 / self.SCALING,
-                                     40 / self.SCALING, 32 / self.SCALING)
+                                         40 / self.SCALING, 32 / self.SCALING)
 
         if self.menu:
             pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect_tracking, width=3, border_radius=20)
             pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect_stopwatch, width=3, border_radius=20)
             pygame.draw.rect(self.SCREEN, tracking_dot_color, rect_tracking_dot, border_radius=20)
             pygame.draw.rect(self.SCREEN, stopwatch_dot_color, rect_stopwatch_dot, border_radius=20)
-
 
     def make_back_button(self):
         """
@@ -337,7 +345,6 @@ class GUI:
             elif self.stopwatch_button.collidepoint(mouse_pos) and not self.stopwatch_is_enabled:
                 self.stopwatch_is_enabled = True
 
-
         elif not self.menu:
             if self.menu_button.collidepoint(mouse_pos):
                 self.menu = True
@@ -363,9 +370,12 @@ class GUI:
         Draw the tracking screen
         :return: Nothing
         """
-        # Make time block
+        # Make radar
         self.make_radar_circles()
         self.make_radar_lines()
+
+        if self.tracking_is_enabled:
+            self.make_tracker()
 
         # Make menu button
         self.make_menu_button()
