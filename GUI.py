@@ -4,6 +4,7 @@ from datetime import datetime
 
 import Stopwatch
 
+
 class GUI:
     def __init__(self):
         self.SCALING = 1.4
@@ -37,6 +38,7 @@ class GUI:
         self.reset_button = None
         self.start_stop_button = None
         self.menu_button = None
+        self.back_button = None
 
         # Pictograms
         self.menu_image = pygame.image.load("images/menu_white.PNG")
@@ -119,7 +121,8 @@ class GUI:
         text_time_rect.topleft = (rectangle_x + 45 / self.SCALING, rectangle_y + 40 / self.SCALING)
 
         # Add to the screen
-        self.SCREEN.blit(text_time_surface, text_time_rect)
+        if not self.menu:
+            self.SCREEN.blit(text_time_surface, text_time_rect)
 
         # Add the outline and the stopwatch function when the stopwatch is enabled
         if stopwatch:
@@ -166,42 +169,115 @@ class GUI:
         y_pos_start_stop = start_stop_rect[1] - 21 / self.SCALING
 
         self.reset_button = (x_pos_reset, y_pos_reset,
-                         160 / self.SCALING, 75 / self.SCALING)
+                             160 / self.SCALING, 75 / self.SCALING)
         self.start_stop_button = (x_pos_start_stop, y_pos_start_stop,
-                              160 / self.SCALING, 75 / self.SCALING)
+                                  160 / self.SCALING, 75 / self.SCALING)
 
-        # Add to the screen
-        # Draw the outline rectangle
-        pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect, width=3, border_radius=30)
+        if not self.menu:
+            # Add to the screen
+            # Draw the outline rectangle
+            pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect, width=3, border_radius=30)
 
-        # Draw the stopwatch text
-        self.SCREEN.blit(stopwatch_text_surface, stopwatch_text_rect)
+            # Draw the stopwatch text
+            self.SCREEN.blit(stopwatch_text_surface, stopwatch_text_rect)
 
-        # Fill the inside
-        pygame.draw.rect(self.SCREEN, start_stop_color, self.start_stop_button, border_radius=20)
+            # Fill the inside
+            pygame.draw.rect(self.SCREEN, start_stop_color, self.start_stop_button, border_radius=20)
 
-        # Draw the outlines
-        pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), self.reset_button, width=3, border_radius=20)
-        pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), self.start_stop_button, width=3, border_radius=20)
+            # Draw the outlines
+            pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), self.reset_button, width=3, border_radius=20)
+            pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), self.start_stop_button, width=3, border_radius=20)
 
-        # Draw the button text
-        self.SCREEN.blit(reset_text, reset_rect)
-        self.SCREEN.blit(start_stop_text, start_stop_rect)
+            # Draw the button text
+            self.SCREEN.blit(reset_text, reset_rect)
+            self.SCREEN.blit(start_stop_text, start_stop_rect)
 
     def make_menu_button(self):
         """
         Function to add the menu icon to the screen
         :return: Nothing
         """
-        # Scale the menu icon
-        menu_image_scaled = pygame.transform.scale(self.menu_image, (50, 50))
-
-        # Set the position of the menu icon
+        menu_image_scaled = pygame.transform.scale(self.menu_image, (55, 50))
         menu_rect = menu_image_scaled.get_rect(topleft=(48 / self.SCALING, 30 / self.SCALING))
         self.menu_button = menu_rect
-        # Blit the menu icon onto the screen
-        self.SCREEN.blit(menu_image_scaled, menu_rect)
 
+        if not self.menu:
+            self.SCREEN.blit(menu_image_scaled, menu_rect)
+
+    def make_menu(self):
+        """
+        Function to make the menu
+        :return: Nothing
+        """
+        rectangle_x = 260 / self.SCALING
+        rectangle_y = 250 / self.SCALING
+
+        text_menu_surface = self.FONTS.get('menu_font').render("Menu", True,
+                                                               self.COLORS.get('white'))
+        text_menu_rect = text_menu_surface.get_rect()
+        text_menu_rect.center = (self.WIDTH / 2, 180 / self.SCALING)
+
+        # Make rectangle
+        rect = pygame.Rect(rectangle_x, rectangle_y, 875 / self.SCALING, 600 / self.SCALING)
+
+        # Add text
+        text_tracking_surface = self.FONTS.get('menu_item_font').render("Tracking", True,
+                                                                        self.COLORS.get('white'))
+        text_tracking_rect = text_tracking_surface.get_rect()
+        text_tracking_rect.topleft = (rectangle_x + 50 / self.SCALING, rectangle_y + 50 / self.SCALING)
+
+        text_stopwatch_surface = self.FONTS.get('menu_item_font').render("Enable\nstopwatch", True,
+                                                                         self.COLORS.get('white'))
+        text_stopwatch_rect = text_stopwatch_surface.get_rect()
+        text_stopwatch_rect.topleft = (rectangle_x + 50 / self.SCALING, rectangle_y + 200 / self.SCALING)
+
+        # Make the menu sliders
+        self.make_menu_item_slider(rectangle_x, rectangle_y)
+
+        if self.menu:
+            # Add to the screen
+            pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect, width=3, border_radius=30)
+
+            self.SCREEN.blit(text_menu_surface, text_menu_rect)
+            self.SCREEN.blit(text_tracking_surface, text_tracking_rect)
+            self.SCREEN.blit(text_stopwatch_surface, text_stopwatch_rect)
+
+    def make_menu_item_slider(self, rectangle_x, rectangle_y):
+        """
+        Function for making the menu sliders
+        :param rectangle_x: x position of the border
+        :param rectangle_y: y position of the border
+        :return: Nothing
+        """
+        rect_tracking = pygame.Rect(rectangle_x + 670 / self.SCALING, rectangle_y + 50 / self.SCALING,
+                                    120 / self.SCALING, 45 / self.SCALING)
+
+        rect_stopwatch = pygame.Rect(rectangle_x + 670 / self.SCALING, rectangle_y + 200 / self.SCALING,
+                                     120 / self.SCALING, 45 / self.SCALING)
+
+        rect_tracking_dot = pygame.Rect(rectangle_x + 670 / self.SCALING, rectangle_y + 50 / self.SCALING,
+                                    120 / self.SCALING, 45 / self.SCALING)
+
+        rect_stopwatch_dot = pygame.Rect(rectangle_x + 670 / self.SCALING, rectangle_y + 200 / self.SCALING,
+                                     120 / self.SCALING, 45 / self.SCALING)
+
+
+        if self.menu:
+            pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect_tracking, width=3, border_radius=20)
+            pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect_stopwatch, width=3, border_radius=20)
+
+
+    def make_back_button(self):
+        """
+        Make the back button
+        :return: Nothing
+        """
+        back_image_scaled = pygame.transform.scale(self.back_image, (60, 50))
+        back_rect = back_image_scaled.get_rect(topleft=(48 / self.SCALING, 30 / self.SCALING))
+        self.back_button = back_rect
+
+        if self.menu:
+            self.SCREEN.blit(back_image_scaled, back_rect)
 
     def check_stopwatch_buttons(self, mouse_pos):
         """
@@ -224,13 +300,14 @@ class GUI:
         :param mouse_pos: position of the mouse
         :return: Nothing
         """
-        menu_box = pygame.Rect(self.menu_button)
 
-        if self.menu_button.collidepoint(mouse_pos):
+        if self.menu_button.collidepoint(mouse_pos) and not self.menu:
             self.menu = True
-            print("menu")
 
-        if self.stopwatch_is_enabled:
+        elif self.back_button.collidepoint(mouse_pos) and self.menu:
+            self.menu = False
+
+        if self.stopwatch_is_enabled and not self.menu:
             self.check_stopwatch_buttons(mouse_pos)
 
     def handle_events(self):
@@ -246,21 +323,52 @@ class GUI:
                 self.check_buttons(mouse_pos)
         return True
 
-    def draw_dynamic(self):
+    def draw_track_screen(self):
         """
-        Function for dynamically drawing the items on the screen
+        Draw the tracking screen
         :return: Nothing
         """
         # Make time block
-        self.SCREEN.fill(self.COLORS.get('black'))
         self.make_radar_circles()
         self.make_radar_lines()
 
         # Make menu button
         self.make_menu_button()
+        self.make_back_button()
 
         # Show or not show the stopwatch
         if self.stopwatch_is_enabled:
             self.make_time_block(True)
         elif not self.stopwatch_is_enabled:
             self.make_time_block(False)
+
+    def draw_menu_screen(self):
+        """
+        Draw the menu screen
+        :return: Nothing
+        """
+        self.make_menu()
+        self.make_back_button()
+
+    def draw_dynamic(self):
+        """
+        Function for dynamically drawing the items on the screen
+        :return: Nothing
+        """
+        self.make_menu_button()
+        self.make_back_button()
+        self.make_time_block(self.stopwatch)
+
+        self.SCREEN.fill(self.COLORS.get('black'))
+
+        if self.menu:
+            self.SCREEN.fill(self.COLORS.get('black'))
+
+            # print("menu show")
+            self.draw_menu_screen()
+
+        if not self.menu:
+            self.SCREEN.fill(self.COLORS.get('black'))
+
+            # print("tracking show")
+            self.draw_track_screen()
