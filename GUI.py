@@ -12,7 +12,9 @@ class GUI:
         self.SCREEN = None
 
         self.stopwatch = Stopwatch.Stopwatch()
-        self.stopwatch_is_enabled = False
+        self.stopwatch_is_enabled = True
+
+        self.menu = False
 
         pygame.font.init()
         self.MAIN_FONT = 'freesansbold.ttf'
@@ -34,7 +36,11 @@ class GUI:
         # Buttons
         self.reset_button = None
         self.start_stop_button = None
-        self.home_button = None
+        self.menu_button = None
+
+        # Pictograms
+        self.menu_image = pygame.image.load("images/menu_white.PNG")
+        self.back_image = pygame.image.load("images/back_arrow_white.png")
 
         # Radar properties
         self.radar_radius = 500 / self.SCALING
@@ -182,6 +188,21 @@ class GUI:
         self.SCREEN.blit(reset_text, reset_rect)
         self.SCREEN.blit(start_stop_text, start_stop_rect)
 
+    def make_menu_button(self):
+        """
+        Function to add the menu icon to the screen
+        :return: Nothing
+        """
+        # Scale the menu icon
+        menu_image_scaled = pygame.transform.scale(self.menu_image, (50, 50))
+
+        # Set the position of the menu icon
+        menu_rect = menu_image_scaled.get_rect(topleft=(48 / self.SCALING, 30 / self.SCALING))
+        self.menu_button = menu_rect
+        # Blit the menu icon onto the screen
+        self.SCREEN.blit(menu_image_scaled, menu_rect)
+
+
     def check_stopwatch_buttons(self, mouse_pos):
         """
         Check is the stopwatch buttons are clicked
@@ -197,12 +218,17 @@ class GUI:
         elif start_stop_box.collidepoint(mouse_pos):
             self.stopwatch.start_stop()
 
-    def check_buttons(self, mouse_pos, ):
+    def check_buttons(self, mouse_pos):
         """
         Function for checking if a button is clicked
         :param mouse_pos: position of the mouse
         :return: Nothing
         """
+        menu_box = pygame.Rect(self.menu_button)
+
+        if self.menu_button.collidepoint(mouse_pos):
+            self.menu = True
+            print("menu")
 
         if self.stopwatch_is_enabled:
             self.check_stopwatch_buttons(mouse_pos)
@@ -229,6 +255,9 @@ class GUI:
         self.SCREEN.fill(self.COLORS.get('black'))
         self.make_radar_circles()
         self.make_radar_lines()
+
+        # Make menu button
+        self.make_menu_button()
 
         # Show or not show the stopwatch
         if self.stopwatch_is_enabled:
