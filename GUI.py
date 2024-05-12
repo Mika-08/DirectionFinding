@@ -5,15 +5,19 @@ from datetime import datetime
 import Stopwatch
 import Tracking
 
+
 class GUI:
-    def __init__(self):
-        self.SCALING = 1.4
+    def __init__(self, scaling):
+        """
+        Constructor function for GUI class
+        """
+        self.SCALING = scaling
         self.WIDTH = 1400 / self.SCALING
         self.HEIGHT = 2 * self.WIDTH / 3
         self.SCREEN = None
 
         self.stopwatch = Stopwatch.Stopwatch()
-        self.tracking = Tracking.Tracking(self.SCALING)
+        self.tracking = Tracking.Tracking()
 
         self.stopwatch_is_enabled = True
         self.tracking_is_enabled = True
@@ -64,15 +68,6 @@ class GUI:
         self.SCREEN = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption("Hornet tracker")
 
-    def make_outline(self, object_to_be_displayed, location_x, location_y):
-        mask = pygame.mask.from_surface(object_to_be_displayed)
-        mask_surface = mask.to_surface()
-        mask_surface.set_colorkey(self.COLORS.get('green'))
-        self.SCREEN.blit(mask_surface, location_x - 1, location_y)
-        self.SCREEN.blit(mask_surface, location_x + 1, location_y)
-        self.SCREEN.blit(mask_surface, location_x, location_y - 1)
-        self.SCREEN.blit(mask_surface, location_x, location_y + 1)
-
     def make_radar_circles(self):
         """
         Function for making the circles of the radar interface using two circles, one inner and one outer
@@ -80,10 +75,11 @@ class GUI:
         """
         for i in range(5):
             # Draw the circles
-            radius_outer_circle = self.radar_radius - i * (100 / self.SCALING) + 6  # 6 to correct for the lines width
+            # 8.4 to correct for the lines width
+            radius_outer_circle = self.radar_radius - i * (100 / self.SCALING) + 8.4 / self.SCALING
             pygame.draw.circle(self.SCREEN, self.COLORS.get('green'), self.radar_circle_center, radius_outer_circle)
             pygame.draw.circle(self.SCREEN, self.COLORS.get('black'), self.radar_circle_center, radius_outer_circle
-                               - 12)  # 12 to get a green outline of 12
+                               - 16.8 / self.SCALING)  # 16.8 to get a green outline of 16.8 / self.SCALING
 
             # Draw the text on the circles
             text_surface = self.FONTS.get('radar_font').render(f"{500 - i * 100}m", True, self.COLORS.get('white'))
@@ -107,13 +103,17 @@ class GUI:
             end_point_x = self.radar_circle_center[0] + np.sin(angle_rad) * self.radar_radius
             end_point_y = self.radar_circle_center[1] + np.cos(angle_rad) * self.radar_radius
             pygame.draw.line(self.SCREEN, self.COLORS.get('green'), self.radar_circle_center,
-                             (int(end_point_x), int(end_point_y)), width=6)
+                             (int(end_point_x), int(end_point_y)), width=int(8.4 / self.SCALING))
 
     def make_tracker(self):
-        tracker_x_pos, tracker_y_pos = self.tracking.make_coordinates()
-        tracker_center = (tracker_x_pos + self.radar_circle_center[0], tracker_y_pos + self.radar_circle_center[1])
+        """
+        Function to let the tracker dot appear on the screen
+        :return: Nothing
+        """
+        tracker_x_pos, tracker_y_pos = self.tracking.make_coordinates(self.SCALING)
+        tracker_center = (int(tracker_x_pos + self.radar_circle_center[0]),
+                          int(tracker_y_pos + self.radar_circle_center[1]))
         tracker_radius = 25 / self.SCALING
-
         pygame.draw.circle(self.SCREEN, self.COLORS.get('red'), tracker_center, tracker_radius)
 
     def make_time_block(self, stopwatch):
@@ -271,19 +271,19 @@ class GUI:
 
         self.stopwatch_button = rect_stopwatch
 
-        tracking_dot_x_pos = 265
+        tracking_dot_x_pos = 371 / self.SCALING
         tracking_dot_color = self.COLORS.get('red')
         if self.tracking_is_enabled:
-            tracking_dot_x_pos = 300
+            tracking_dot_x_pos = 420 / self.SCALING
             tracking_dot_color = self.COLORS.get('green')
 
         rect_tracking_dot = pygame.Rect(tracking_dot_x_pos + 575 / self.SCALING,
                                         rectangle_y + 57 / self.SCALING, 40 / self.SCALING, 32 / self.SCALING)
 
-        stopwatch_dot_x_pos = 265
+        stopwatch_dot_x_pos = 371 / self.SCALING
         stopwatch_dot_color = self.COLORS.get('red')
         if self.stopwatch_is_enabled:
-            stopwatch_dot_x_pos = 300
+            stopwatch_dot_x_pos = 420 / self.SCALING
             stopwatch_dot_color = self.COLORS.get('green')
 
         rect_stopwatch_dot = pygame.Rect(stopwatch_dot_x_pos + 575 / self.SCALING, rectangle_y + 207 / self.SCALING,
