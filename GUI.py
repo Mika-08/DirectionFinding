@@ -22,7 +22,7 @@ class GUI:
         self.stopwatch_is_enabled = True
         self.tracking_is_enabled = True
 
-        self.menu = True
+        self.menu = False
 
         pygame.font.init()
         self.MAIN_FONT = 'freesansbold.ttf'
@@ -520,6 +520,7 @@ class GUI:
         self.make_menu_button()
         self.make_back_button()
         self.make_time_block(self.stopwatch)
+        self.make_menu()
 
         self.SCREEN.fill(self.COLORS.get('black'))
 
