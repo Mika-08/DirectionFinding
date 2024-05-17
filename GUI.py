@@ -22,7 +22,7 @@ class GUI:
         self.stopwatch_is_enabled = True
         self.tracking_is_enabled = True
 
-        self.menu = False
+        self.menu = True
 
         pygame.font.init()
         self.MAIN_FONT = 'freesansbold.ttf'
@@ -48,6 +48,12 @@ class GUI:
         self.back_button = None
         self.tracking_button = None
         self.stopwatch_button = None
+        self.gain_slider = None
+
+
+        self.gain_slider_x = 0
+        self.gain = None
+        self.dragging = None
 
         # Pictograms
         self.menu_image = pygame.image.load("images/menu_white.PNG")
@@ -233,15 +239,23 @@ class GUI:
         rect = pygame.Rect(rectangle_x, rectangle_y, 875 / self.SCALING, 600 / self.SCALING)
 
         # Add text
+        # Tracking
         text_tracking_surface = self.FONTS.get('menu_item_font').render("Tracking", True,
                                                                         self.COLORS.get('white'))
         text_tracking_rect = text_tracking_surface.get_rect()
         text_tracking_rect.topleft = (rectangle_x + 50 / self.SCALING, rectangle_y + 50 / self.SCALING)
 
+        # Stopwatch
         text_stopwatch_surface = self.FONTS.get('menu_item_font').render("Enable\nstopwatch", True,
                                                                          self.COLORS.get('white'))
         text_stopwatch_rect = text_stopwatch_surface.get_rect()
         text_stopwatch_rect.topleft = (rectangle_x + 50 / self.SCALING, rectangle_y + 200 / self.SCALING)
+
+        # Gain
+        text_gain_surface = self.FONTS.get('menu_item_font').render("Dongle gain", True,
+                                                                    self.COLORS.get('white'))
+        text_gain_rect = text_gain_surface.get_rect()
+        text_gain_rect.topleft = (rectangle_x + 50 / self.SCALING, rectangle_y + 400 / self.SCALING)
 
         # Make the menu sliders
         self.make_menu_item_slider(rectangle_x, rectangle_y)
@@ -253,6 +267,7 @@ class GUI:
             self.SCREEN.blit(text_menu_surface, text_menu_rect)
             self.SCREEN.blit(text_tracking_surface, text_tracking_rect)
             self.SCREEN.blit(text_stopwatch_surface, text_stopwatch_rect)
+            self.SCREEN.blit(text_gain_surface, text_gain_rect)
 
     def make_menu_item_slider(self, rectangle_x, rectangle_y):
         """
@@ -261,6 +276,9 @@ class GUI:
         :param rectangle_y: y position of the border
         :return: Nothing
         """
+
+        # TODO: Divide into multiple functions
+
         rect_tracking = pygame.Rect(rectangle_x + 670 / self.SCALING, rectangle_y + 50 / self.SCALING,
                                     120 / self.SCALING, 45 / self.SCALING)
 
@@ -289,11 +307,71 @@ class GUI:
         rect_stopwatch_dot = pygame.Rect(stopwatch_dot_x_pos + 575 / self.SCALING, rectangle_y + 207 / self.SCALING,
                                          40 / self.SCALING, 32 / self.SCALING)
 
+        self.make_gain_slider(rectangle_x, rectangle_y)
+
         if self.menu:
             pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect_tracking, width=3, border_radius=20)
             pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect_stopwatch, width=3, border_radius=20)
             pygame.draw.rect(self.SCREEN, tracking_dot_color, rect_tracking_dot, border_radius=20)
             pygame.draw.rect(self.SCREEN, stopwatch_dot_color, rect_stopwatch_dot, border_radius=20)
+
+    def make_gain_slider(self, rectangle_x, rectangle_y):
+        """
+        Make the gain slider
+        :param rectangle_x: x position of the menu rectangle
+        :param rectangle_y: y position of the menu rectangle
+        :return: Nothing
+        """
+
+        slider_x = rectangle_x + 370 / self.SCALING
+        slider_y = rectangle_y + 400 / self.SCALING
+
+        slider_width = 420 / self.SCALING
+        dot_width = 40 / self.SCALING
+
+        rect_gain = pygame.Rect(slider_x, slider_y, slider_width, 45 / self.SCALING)
+
+        # self.gain_slider_x = slider_x
+
+        if self.gain_slider_x < slider_x:
+            self.gain_slider_x = slider_x
+
+        if self.gain_slider_x > slider_x + 261.42857142857144:
+            self.gain_slider_x = slider_x + 261.42857142857144
+
+        rect_gain_dot = pygame.Rect(self.gain_slider_x + 7 / self.SCALING,
+                                    slider_y + 7 / self.SCALING, dot_width, 32 / self.SCALING)
+
+        self.gain_slider = rect_gain_dot
+
+        self.calculate_gain(slider_x, slider_width, dot_width)
+
+        if self.menu:
+            pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect_gain, width=3, border_radius=20)
+            pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect_gain_dot, border_radius=20)
+
+    def calculate_gain(self, slider_x, slider_width, dot_width):
+        """
+        Calculate the gain value
+        :param slider_x: The x position of the slider rectangle
+        :param slider_width: The width of the slider rectangle
+        :param dot_width: The width of the slider dot
+        :return: Nothing
+        """
+        gain_values = [0.0, 0.9, 1.4, 2.7, 3.7, 7.7, 8.7, 12.5, 14.4, 15.7, 16.6, 19.7, 20.7, 22.9, 25.4, 28.0, 29.7,
+                       32.8, 33.8, 36.4, 37.2, 38.6, 40.2, 42.1, 43.4, 43.9, 44.5, 48.0, 49.6]
+
+        min_value_gain = min(gain_values)
+        max_value_gain = max(gain_values)
+
+        normalized_gain_values = [(value - min_value_gain) / (max_value_gain - min_value_gain) *
+                                  (slider_width - 14 / self.SCALING - dot_width) for value in gain_values]
+
+        slider_value = (self.gain_slider_x - slider_x) / (slider_width - 14 / self.SCALING - dot_width) * \
+                       (max_value_gain - min_value_gain) + min_value_gain
+
+        self.gain = min(gain_values, key=lambda x: abs(x - slider_value))
+
 
     def make_back_button(self):
         """
@@ -352,17 +430,36 @@ class GUI:
             if self.stopwatch_is_enabled:
                 self.check_stopwatch_buttons(mouse_pos)
 
+    def check_gain_slider(self, event):
+        """
+        Check if the slider is adjusted
+        :param event: Event in the event list
+        :return: Noting
+        """
+        if self.menu:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.gain_slider.collidepoint(event.pos):
+                    self.dragging = True
+            elif event.type == pygame.MOUSEBUTTONUP:
+                self.dragging = False
+            elif event.type == pygame.MOUSEMOTION:
+                if self.dragging:
+                    mouse_x, _ = event.pos
+                    self.gain_slider_x = mouse_x
+
     def handle_events(self):
         """
         Event handler
         :return: Nothing
         """
         for event in pygame.event.get():
+            mouse_pos = pygame.mouse.get_pos()
             if event.type == pygame.QUIT:
                 return False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
                 self.check_buttons(mouse_pos)
+
+            self.check_gain_slider(mouse_pos, event)
         return True
 
     def draw_track_screen(self):
