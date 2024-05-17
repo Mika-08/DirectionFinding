@@ -31,7 +31,8 @@ class GUI:
             "time_font": pygame.font.Font(self.MAIN_FONT, int(30 / self.SCALING)),
             "stopwatch_font": pygame.font.Font(self.MAIN_FONT, int(30 / self.SCALING)),
             "menu_font": pygame.font.Font(self.MAIN_FONT, int(100 / self.SCALING)),
-            "menu_item_font": pygame.font.Font(self.MAIN_FONT, int(50 / self.SCALING))
+            "menu_item_font": pygame.font.Font(self.MAIN_FONT, int(50 / self.SCALING)),
+            "gain_slider_font": pygame.font.Font(self.MAIN_FONT, int(30 / self.SCALING))
         }
 
         self.COLORS = {
@@ -49,7 +50,6 @@ class GUI:
         self.tracking_button = None
         self.stopwatch_button = None
         self.gain_slider = None
-
 
         self.gain_slider_x = 0
         self.gain = None
@@ -251,11 +251,29 @@ class GUI:
         text_stopwatch_rect = text_stopwatch_surface.get_rect()
         text_stopwatch_rect.topleft = (rectangle_x + 50 / self.SCALING, rectangle_y + 200 / self.SCALING)
 
-        # Gain
+        # Gain text
         text_gain_surface = self.FONTS.get('menu_item_font').render("Dongle gain", True,
                                                                     self.COLORS.get('white'))
         text_gain_rect = text_gain_surface.get_rect()
         text_gain_rect.topleft = (rectangle_x + 50 / self.SCALING, rectangle_y + 400 / self.SCALING)
+
+        # Gain left bound
+        text_gain_left_surface = self.FONTS.get('gain_slider_font').render("0 dB", True,
+                                                                         self.COLORS.get('white'))
+        text_gain_left_rect = text_gain_left_surface.get_rect()
+        text_gain_left_rect.topleft = (rectangle_x + 380 / self.SCALING, rectangle_y + 350 / self.SCALING)
+
+        # Gain right bound
+        text_gain_right_surface = self.FONTS.get('gain_slider_font').render("49.6 dB", True,
+                                                                          self.COLORS.get('white'))
+        text_gain_right_rect = text_gain_right_surface.get_rect()
+        text_gain_right_rect.topleft = (rectangle_x + 675 / self.SCALING, rectangle_y + 350 / self.SCALING)
+
+        # Gain value
+        text_gain_value_surface = self.FONTS.get('gain_slider_font').render(f"{self.gain} dB", True,
+                                                                          self.COLORS.get('white'))
+        text_gain_value_rect = text_gain_value_surface.get_rect()
+        text_gain_value_rect.topleft = (rectangle_x + 525 / self.SCALING, rectangle_y + 450 / self.SCALING)
 
         # Make the menu sliders
         self.make_menu_item_slider(rectangle_x, rectangle_y)
@@ -268,6 +286,9 @@ class GUI:
             self.SCREEN.blit(text_tracking_surface, text_tracking_rect)
             self.SCREEN.blit(text_stopwatch_surface, text_stopwatch_rect)
             self.SCREEN.blit(text_gain_surface, text_gain_rect)
+            self.SCREEN.blit(text_gain_left_surface, text_gain_left_rect)
+            self.SCREEN.blit(text_gain_right_surface, text_gain_right_rect)
+            self.SCREEN.blit(text_gain_value_surface, text_gain_value_rect)
 
     def make_menu_item_slider(self, rectangle_x, rectangle_y):
         """
@@ -372,7 +393,6 @@ class GUI:
 
         self.gain = min(gain_values, key=lambda x: abs(x - slider_value))
 
-
     def make_back_button(self):
         """
         Make the back button
@@ -459,7 +479,7 @@ class GUI:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 self.check_buttons(mouse_pos)
 
-            self.check_gain_slider(mouse_pos, event)
+            self.check_gain_slider(event)
         return True
 
     def draw_track_screen(self):
