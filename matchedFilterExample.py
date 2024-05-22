@@ -7,31 +7,31 @@ import scipy.signal as sp
 
 sig = [1, 1, 0, 1, 1, 0, 0, 1] #test code
 print(sig)
-fig=plt.figure(figsize=(10,8))
-plt.plot(sig, label='signal')
-plt.xlabel('Sample')
-plt.ylabel('Value')
-plt.title('An Example Signal')
-plt.grid()
+# fig=plt.figure(figsize=(10,8))
+# plt.plot(sig, label='signal')
+# plt.xlabel('Sample')
+# plt.ylabel('Value')
+# plt.title('An Example Signal')
+# plt.grid()
 
 
-sig_inzeros=np.hstack([np.zeros(4),sig,np.zeros(5)]) #test code in lager signal
-plt.figure(figsize=(10,8))
-plt.plot(sig_inzeros)
-plt.xlabel('Sample')
-plt.ylabel('Value')
-plt.title('The Signal at Some Point in Time')
-plt.grid()
+sig_inzeros=np.hstack([np.zeros(4),sig,np.zeros(10), sig, np.zeros(15), sig, np.zeros(10)]) #test code in lager signal
+# plt.figure(figsize=(10,8))
+# plt.plot(sig_inzeros)
+# plt.xlabel('Sample')
+# plt.ylabel('Value')
+# plt.title('The Signal at Some Point in Time')
+# plt.grid()
 
 
 signoise = np.random.rand(len(sig_inzeros))-0.5+sig_inzeros # add noise
-plt.figure(figsize=(10,8))
-plt.plot(signoise)
-plt.xlabel('Sample')
-plt.ylabel('Value')
-plt.title('The Example Signal in Noise')
-plt.grid()
-plt.show()
+# plt.figure(figsize=(10,8))
+# plt.plot(signoise)
+# plt.xlabel('Sample')
+# plt.ylabel('Value')
+# plt.title('The Example Signal in Noise')
+# plt.grid()
+# plt.show()
 
 
 #h = sig[::-1] # fliplr marched filter
@@ -45,6 +45,9 @@ plt.title('The Example Signal in Noise after Macthed Filtering')
 plt.grid()
 plt.show()
 
+peaks, _ = sp.find_peaks(output, distance = len(sig), height = 2)
+
+print(peaks)
 
 
 
