@@ -259,19 +259,19 @@ class GUI:
 
         # Gain left bound
         text_gain_left_surface = self.FONTS.get('gain_slider_font').render("0 dB", True,
-                                                                         self.COLORS.get('white'))
+                                                                           self.COLORS.get('white'))
         text_gain_left_rect = text_gain_left_surface.get_rect()
         text_gain_left_rect.topleft = (rectangle_x + 380 / self.SCALING, rectangle_y + 350 / self.SCALING)
 
         # Gain right bound
         text_gain_right_surface = self.FONTS.get('gain_slider_font').render("49.6 dB", True,
-                                                                          self.COLORS.get('white'))
+                                                                            self.COLORS.get('white'))
         text_gain_right_rect = text_gain_right_surface.get_rect()
         text_gain_right_rect.topleft = (rectangle_x + 675 / self.SCALING, rectangle_y + 350 / self.SCALING)
 
         # Gain value
         text_gain_value_surface = self.FONTS.get('gain_slider_font').render(f"{self.gain} dB", True,
-                                                                          self.COLORS.get('white'))
+                                                                            self.COLORS.get('white'))
         text_gain_value_rect = text_gain_value_surface.get_rect()
         text_gain_value_rect.topleft = (rectangle_x + 525 / self.SCALING, rectangle_y + 450 / self.SCALING)
 
