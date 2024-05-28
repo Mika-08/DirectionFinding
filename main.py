@@ -16,7 +16,7 @@ def get_signal():
     #         shared_data.append(i)
     #     print("Get signal)"
 
-    receiver.receiver_samples()
+    receiver.receive_samples()
     print(receiver.samples)
 
 
