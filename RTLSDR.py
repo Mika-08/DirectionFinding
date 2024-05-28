@@ -14,6 +14,9 @@ class Receiver:
         self.sdr.gain = 'auto'
 
     def receive_samples(self):
+        """
+        PYDOC HERE
+        """
         while True:
             samples = self.sdr.read_samples(256 * 1024)  # Read samples from the SDR
             with self.sample_lock:
