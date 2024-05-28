@@ -17,9 +17,7 @@ def get_signal():
     #     print("Get signal)"
 
     receiver.receive_samples()
-    print(receiver.samples)
-
-
+    # print(receiver.samples)
 
 
 def main():

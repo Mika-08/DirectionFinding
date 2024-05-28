@@ -57,7 +57,7 @@ class Receiver:
         # Configure SDR settings
         self.sdr.sample_rate = 2.4e6  # Hz
         self.sdr.center_freq = 434e6  # Hz
-        self.sdr.gain = '50'
+        self.sdr.gain = 'auto'
 
         self.receiving = True
 
@@ -68,6 +68,15 @@ class Receiver:
         while self.receiving:
             samples = self.sdr.read_samples(256 * 1024)  # Read samples from the SDR
             self.samples = samples
+            print(self.samples)
+            print("New")
+            self.save_data()
+
+    def save_data(self):
+        file = open("Output_noise_and_signal.txt", "a")
+        file.write(np.array_str(self.samples))
+        file.write("\n new \n")
+        file.close()
 
     def stop_receiving(self):
         self.receiving = False
@@ -75,3 +84,5 @@ class Receiver:
 
     def get_samples(self):
         return self.samples
+
+
