@@ -3,16 +3,16 @@ import GUI
 import threading
 import Receiver
 # import RTLSDR
+#
+# center_freq = 434e6
+# sample_rate = 2.048e6
+# shared_data = []
+# data_lock = threading.Lock()
+# receiver = Receiver.Receiver(center_freq, sample_rate)
 
-center_freq = 434e6
-sample_rate = 2.048e6
-shared_data = []
-data_lock = threading.Lock()
-receiver = Receiver.Receiver(center_freq, sample_rate)
 
-
-def get_signal():
-    receiver.start_receiving()
+# def get_signal():
+#     receiver.start_receiving()
 
 
 def main():
@@ -21,7 +21,7 @@ def main():
     :return:
     """
 
-    t1 = threading.Thread(target=get_signal, name='Signal_thread')
+    # t1 = threading.Thread(target=get_signal, name='Signal_thread')
 
     # For running on Mac scaling = 1.4
     scaling = 1.4
@@ -29,7 +29,7 @@ def main():
     gui = GUI.GUI(scaling)
     gui.init_window()
     pygame.display.update()
-    t1.start()
+    # t1.start()
 
     running = True
     while running:
@@ -37,8 +37,8 @@ def main():
         pygame.display.update()
         running = gui.handle_events()
 
-    receiver.stop_receiving()
-    t1.join()
+    # receiver.stop_receiving()
+    # t1.join()
     pygame.quit()
 
 

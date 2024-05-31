@@ -19,10 +19,11 @@ class GUI:
         self.stopwatch = Stopwatch.Stopwatch()
         self.tracking = Tracking.Tracking()
 
-        self.stopwatch_is_enabled = True
-        self.tracking_is_enabled = True
-
-        self.menu = False
+        self.states = {
+            "stopwatch_is_enabled": True,
+            "tracking_is_enabled": True,
+            "menu": False
+        }
 
         pygame.font.init()
         self.MAIN_FONT = 'freesansbold.ttf'
@@ -133,7 +134,7 @@ class GUI:
         text_time_rect.topleft = (rectangle_x + 45 / self.SCALING, rectangle_y + 40 / self.SCALING)
 
         # Add to the screen
-        if not self.menu:
+        if not self.states["menu"]:
             self.SCREEN.blit(text_time_surface, text_time_rect)
 
         # Add the outline and the stopwatch function when the stopwatch is enabled
@@ -185,7 +186,7 @@ class GUI:
         self.start_stop_button = (x_pos_start_stop, y_pos_start_stop,
                                   160 / self.SCALING, 75 / self.SCALING)
 
-        if not self.menu:
+        if not self.states["menu"]:
             # Add to the screen
             # Draw the outline rectangle
             pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect, width=3, border_radius=30)
@@ -213,7 +214,7 @@ class GUI:
         menu_rect = menu_image_scaled.get_rect(topleft=(48 / self.SCALING, 30 / self.SCALING))
         self.menu_button = menu_rect
 
-        if not self.menu:
+        if not self.states["menu"]:
             self.SCREEN.blit(menu_image_scaled, menu_rect)
 
     def make_menu(self):
@@ -272,7 +273,7 @@ class GUI:
         # Make the menu sliders
         self.make_menu_item_slider(rectangle_x, rectangle_y)
 
-        if self.menu:
+        if self.states["menu"]:
             # Add to the screen
             pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect, width=3, border_radius=30)
 
@@ -306,7 +307,7 @@ class GUI:
 
         tracking_dot_x_pos = 371 / self.SCALING
         tracking_dot_color = self.COLORS.get('red')
-        if self.tracking_is_enabled:
+        if self.states["tracking_is_enabled"]:
             tracking_dot_x_pos = 420 / self.SCALING
             tracking_dot_color = self.COLORS.get('green')
 
@@ -315,7 +316,7 @@ class GUI:
 
         stopwatch_dot_x_pos = 371 / self.SCALING
         stopwatch_dot_color = self.COLORS.get('red')
-        if self.stopwatch_is_enabled:
+        if self.states["stopwatch_is_enabled"]:
             stopwatch_dot_x_pos = 420 / self.SCALING
             stopwatch_dot_color = self.COLORS.get('green')
 
@@ -324,7 +325,7 @@ class GUI:
 
         self.make_gain_slider(rectangle_x, rectangle_y)
 
-        if self.menu:
+        if self.states["menu"]:
             pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect_tracking, width=3, border_radius=20)
             pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect_stopwatch, width=3, border_radius=20)
             pygame.draw.rect(self.SCREEN, tracking_dot_color, rect_tracking_dot, border_radius=20)
@@ -361,7 +362,7 @@ class GUI:
 
         self.calculate_gain(slider_x, slider_width, dot_width)
 
-        if self.menu:
+        if self.states["menu"]:
             pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect_gain, width=3, border_radius=20)
             pygame.draw.rect(self.SCREEN, self.COLORS.get('white'), rect_gain_dot, border_radius=20)
 
@@ -396,7 +397,7 @@ class GUI:
         back_rect = back_image_scaled.get_rect(topleft=(48 / self.SCALING, 30 / self.SCALING))
         self.back_button = back_rect
 
-        if self.menu:
+        if self.states["menu"]:
             self.SCREEN.blit(back_image_scaled, back_rect)
 
     def check_stopwatch_buttons(self, mouse_pos):
@@ -421,27 +422,27 @@ class GUI:
         :return: Nothing
         """
 
-        if self.menu:
+        if self.states["menu"]:
             if self.back_button.collidepoint(mouse_pos):
-                self.menu = False
+                self.states["menu"] = False
 
-            if self.tracking_button.collidepoint(mouse_pos) and self.tracking_is_enabled:
-                self.tracking_is_enabled = False
+            if self.tracking_button.collidepoint(mouse_pos) and self.states["tracking_is_enabled"]:
+                self.states["tracking_is_enabled"] = False
 
-            elif self.tracking_button.collidepoint(mouse_pos) and not self.tracking_is_enabled:
-                self.tracking_is_enabled = True
+            elif self.tracking_button.collidepoint(mouse_pos) and not self.states["tracking_is_enabled"]:
+                self.states["tracking_is_enabled"] = True
 
-            if self.stopwatch_button.collidepoint(mouse_pos) and self.stopwatch_is_enabled:
-                self.stopwatch_is_enabled = False
+            if self.stopwatch_button.collidepoint(mouse_pos) and self.states["stopwatch_is_enabled"]:
+                self.states["stopwatch_is_enabled"] = False
 
-            elif self.stopwatch_button.collidepoint(mouse_pos) and not self.stopwatch_is_enabled:
-                self.stopwatch_is_enabled = True
+            elif self.stopwatch_button.collidepoint(mouse_pos) and not self.states["stopwatch_is_enabled"]:
+                self.states["stopwatch_is_enabled"] = True
 
-        elif not self.menu:
+        elif not self.states["menu"]:
             if self.menu_button.collidepoint(mouse_pos):
-                self.menu = True
+                self.states["menu"] = True
 
-            if self.stopwatch_is_enabled:
+            if self.states["stopwatch_is_enabled"]:
                 self.check_stopwatch_buttons(mouse_pos)
 
     def check_gain_slider(self, event):
@@ -450,7 +451,7 @@ class GUI:
         :param event: Event in the event list
         :return: Noting
         """
-        if self.menu:
+        if self.states["menu"]:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.gain_slider.collidepoint(event.pos):
                     self.dragging = True
@@ -485,7 +486,7 @@ class GUI:
         self.make_radar_circles()
         self.make_radar_lines()
 
-        if self.tracking_is_enabled:
+        if self.states["tracking_is_enabled"]:
             self.make_tracker()
 
         # Make menu button
@@ -493,9 +494,9 @@ class GUI:
         self.make_back_button()
 
         # Show or not show the stopwatch
-        if self.stopwatch_is_enabled:
+        if self.states["stopwatch_is_enabled"]:
             self.make_time_block(True)
-        elif not self.stopwatch_is_enabled:
+        elif not self.states["stopwatch_is_enabled"]:
             self.make_time_block(False)
 
     def draw_menu_screen(self):
@@ -518,13 +519,13 @@ class GUI:
 
         self.SCREEN.fill(self.COLORS.get('black'))
 
-        if self.menu:
+        if self.states["menu"]:
             self.SCREEN.fill(self.COLORS.get('black'))
 
             # print("menu show")
             self.draw_menu_screen()
 
-        if not self.menu:
+        if not self.states["menu"]:
             self.SCREEN.fill(self.COLORS.get('black'))
 
             # print("tracking show")
