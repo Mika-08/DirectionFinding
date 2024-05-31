@@ -1,4 +1,3 @@
-import Connection
 import Kalman
 
 
@@ -8,7 +7,6 @@ class SignalProcessing:
         Constructor for the signal processing class
         """
         self.status = False
-        self.connection = Connection.Connection()
         self.kalman = Kalman.Kalman()
 
     def create_aoa(self):

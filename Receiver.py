@@ -1,88 +1,64 @@
-# from rtlsdr import *
-# import threading
-# from matplotlib import pyplot
-#
-# class Receiver:
-#     def __init__(self):
-#         self.samples = None
-#         self.sample_lock = threading.Lock()
-#         self.sdr = RtlSdr()
-#
-#         # Configure SDR settings
-#         self.sdr.sample_rate = 2.048e6  # Hz
-#         self.sdr.center_freq = 433.96e6  # Hz
-#         self.sdr.gain = 'auto'
-#
-#     def receive_samples(self):
-#         while True:
-#             samples = self.sdr.read_samples(256 * 1024)  # Read samples from the SDR
-#             with self.sample_lock:
-#                 self.samples = samples
-#
-#     def get_samples(self):
-#         receive_thread = threading.Thread(target=self.receive_samples, args=(self.sdr,))
-#         receive_thread.daemon = True  # Allows program to exit even if the thread is running
-#         receive_thread.start()
-#         #
-#         # # Start the processing loop in the main thread
-#         # try:
-#         #     process_samples()
-#         # except KeyboardInterrupt:
-#         #     print("Terminating...")
-#
-#
-# receiver = Receiver()
-# receiver.get_samples()
-# receiver.sdr.close()
-#
-# # use matplotlib to estimate and plot the PSD
-# pyplot.psd(receiver.samples, NFFT=1024, Fs=receiver.sdr.sample_rate/1e6, Fc=receiver.sdr.center_freq/1e6)
-# pyplot.xlabel('Frequency (MHz)')
-# pyplot.ylabel('Relative power (dB)')
-#
-# pyplot.show()
-#
-
-
-from rtlsdr import RtlSdr
 import numpy as np
-from matplotlib import pyplot as plt
-from matplotlib.animation import FuncAnimation
+import threading
+from rtlsdr import RtlSdr
 
 class Receiver:
-    def __init__(self):
-        self.samples = None
-        self.sdr = RtlSdr()
+    def __init__(self, center_freq, sample_rate, gain='auto', device_index=0):
+        """
+        Constructor for the ReceiverTest class
+        :param center_freq: center frequency of the signal
+        :param sample_rate: sampling rate
+        :param gain: gain of the dongle
+        :param device_index: index of the RTL-SDR dongle
+        """
+        self.receive_thread = None
+        self.samples = np.zeros(int(5 * sample_rate), dtype=np.complex64)
+        self.sample_lock = threading.Lock()
+        self.sdr = RtlSdr(device_index=device_index)
 
         # Configure SDR settings
-        self.sdr.sample_rate = 2.4e6  # Hz
-        self.sdr.center_freq = 434e6  # Hz
-        self.sdr.gain = 'auto'
+        self.sdr.sample_rate = sample_rate  # Hz
+        self.sdr.center_freq = center_freq  # Hz
+        self.sdr.gain = gain
 
-        self.receiving = True
+        # Flag to stop the receiving thread
+        self.terminate_flag = threading.Event()
 
     def receive_samples(self):
         """
-        PYDOC HERE
+        Function to receive the samples
+        :return: Nothing
         """
-        while self.receiving:
+        while not self.terminate_flag.is_set():
             samples = self.sdr.read_samples(256 * 1024)  # Read samples from the SDR
-            self.samples = samples
-            print(self.samples)
-            print("New")
-            self.save_data()
+            with self.sample_lock:
+                self.samples = np.roll(self.samples, -len(samples))
+                self.samples[-len(samples):] = samples
 
-    def save_data(self):
-        file = open("Output_noise_and_signal.txt", "a")
-        file.write(np.array_str(self.samples))
-        file.write("\n new \n")
-        file.close()
+    def start_receiving(self):
+        """
+        Function to make a thread to receive the samples
+        :return: Nothing
+        """
+        self.receive_thread = threading.Thread(target=self.receive_samples)
+        self.receive_thread.daemon = True  # Allows the program to exit even if the thread is running
+        self.receive_thread.start()
 
     def stop_receiving(self):
-        self.receiving = False
+        """
+        Function to stop receiving when the terminate_flag has been set
+        :return: Nothing
+        """
+        self.terminate_flag.set()
+        self.receive_thread.join()
         self.sdr.close()
 
     def get_samples(self):
-        return self.samples
+        """
+        Function to get the samples using a data lock
+        :return: The samples
+        """
+        with self.sample_lock:
+            return self.samples
 
 

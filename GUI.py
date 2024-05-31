@@ -69,8 +69,6 @@ class GUI:
         }
         self.radar_properties["circle_center"] = (self.radar_properties["circle_center_x"], self.radar_properties["circle_center_y"])
 
-
-
     def init_window(self):
         """
         Function for initializing the screen
@@ -117,7 +115,6 @@ class GUI:
         tracker_center = (int(tracker_x_pos + self.radar_properties["circle_center_x"]), int(tracker_y_pos + self.radar_properties["circle_center_y"]))
         tracker_radius = 25 / self.SCALING
         pygame.draw.circle(self.SCREEN, self.COLORS['red'], tracker_center, tracker_radius)
-
 
     def make_time_block(self, stopwatch):
         """
