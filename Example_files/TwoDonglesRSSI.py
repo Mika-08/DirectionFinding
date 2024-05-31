@@ -5,7 +5,6 @@ from matplotlib.animation import FuncAnimation
 from rtlsdr import RtlSdr
 import Receiver
 
-
 # Initialize receivers with the center frequency and sample rate
 center_freq = 434e6
 sample_rate = 2.048e6
@@ -43,6 +42,8 @@ def init():
     Initialize the plot
     :return:
     """
+    line1.set_ydata(np.zeros_like(y_data1))
+    line2.set_ydata(np.zeros_like(y_data2))
     return line1, line2
 
 
