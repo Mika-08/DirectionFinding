@@ -4,20 +4,15 @@ import threading
 import Receiver
 # import RTLSDR
 
+center_freq = 434e6
+sample_rate = 2.048e6
 shared_data = []
 data_lock = threading.Lock()
-receiver = Receiver.Receiver()
+receiver = Receiver.Receiver(center_freq, sample_rate)
 
 
 def get_signal():
-    # global shared_data
-    # for i in range(100):
-    #     with data_lock:
-    #         shared_data.append(i)
-    #     print("Get signal)"
-
-    receiver.receive_samples()
-    # print(receiver.samples)
+    receiver.start_receiving()
 
 
 def main():
@@ -38,10 +33,6 @@ def main():
 
     running = True
     while running:
-        # print("Draw GUI")
-        # with data_lock:
-        #     # Access shared_data safely
-        #     gui.update_data(shared_data)
         gui.draw_dynamic()
         pygame.display.update()
         running = gui.handle_events()

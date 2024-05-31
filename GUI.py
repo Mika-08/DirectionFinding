@@ -56,14 +56,20 @@ class GUI:
         self.dragging = None
 
         # Pictograms
-        self.menu_image = pygame.image.load("images/menu_white.PNG")
-        self.back_image = pygame.image.load("images/back_arrow_white.png")
+        self.pictograms = {
+            "menu_image": pygame.image.load("images/menu_white.PNG"),
+            "back_image": pygame.image.load("images/back_arrow_white.png")
+        }
 
         # Radar properties
-        self.radar_radius = 500 / self.SCALING
-        self.radar_circle_center_x = int(self.WIDTH / 2)
-        self.radar_circle_center_y = int(4 * self.HEIGHT / 5)
-        self.radar_circle_center = (self.radar_circle_center_x, self.radar_circle_center_y)
+        self.radar_properties = {
+            "radius": 500 / self.SCALING,
+            "circle_center_x": int(self.WIDTH / 2),
+            "circle_center_y": int(4 * self.HEIGHT / 5),
+        }
+        self.radar_properties["circle_center"] = (self.radar_properties["circle_center_x"], self.radar_properties["circle_center_y"])
+
+
 
     def init_window(self):
         """
@@ -76,51 +82,42 @@ class GUI:
 
     def make_radar_circles(self):
         """
-        Function for making the circles of the radar interface using two circles, one inner and one outer
-        :return: Nothing
+        Draw radar circles on the GUI.
         """
         for i in range(5):
-            # Draw the circles
-            # 8.4 to correct for the lines width
-            radius_outer_circle = self.radar_radius - i * (100 / self.SCALING) + 8.4 / self.SCALING
-            pygame.draw.circle(self.SCREEN, self.COLORS.get('green'), self.radar_circle_center, radius_outer_circle)
-            pygame.draw.circle(self.SCREEN, self.COLORS.get('black'), self.radar_circle_center, radius_outer_circle
-                               - 16.8 / self.SCALING)  # 16.8 to get a green outline of 16.8 / self.SCALING
+            radius_outer_circle = self.radar_properties["radius"] - i * (100 / self.SCALING) + 8.4 / self.SCALING
+            pygame.draw.circle(self.SCREEN, self.COLORS['green'], self.radar_properties["circle_center"],
+                               radius_outer_circle)
+            pygame.draw.circle(self.SCREEN, self.COLORS['black'], self.radar_properties["circle_center"],
+                               radius_outer_circle - 16.8 / self.SCALING)
 
-            # Draw the text on the circles
-            text_surface = self.FONTS.get('radar_font').render(f"{500 - i * 100}m", True, self.COLORS.get('white'))
+            text_surface = self.FONTS['radar_font'].render(f"{500 - i * 100}m", True, self.COLORS['white'])
             text_rect = text_surface.get_rect()
-
-            # 49 and 14 for spacing the text between the lines
-            text_rect.center = (self.radar_circle_center[0] + 49 / self.SCALING,
-                                self.radar_circle_center[1] - radius_outer_circle - 14 / self.SCALING)
+            text_rect.center = (self.radar_properties["circle_center"][0] + 49 / self.SCALING,
+                                self.radar_properties["circle_center"][1] - radius_outer_circle - 14 / self.SCALING)
             self.SCREEN.blit(text_surface, text_rect)
 
-        # Draw the middle circle
-        pygame.draw.circle(self.SCREEN, self.COLORS.get('green'), self.radar_circle_center, 10 / self.SCALING)
+        pygame.draw.circle(self.SCREEN, self.COLORS['green'], self.radar_properties["circle_center"], 10 / self.SCALING)
 
     def make_radar_lines(self):
         """
-        Function for making the radar lines every 45 degrees
-        :return: Nothing
+        Draw radar lines on the GUI.
         """
         for i in range(8):
-            angle_rad = np.radians(45 * i)  # Convert degrees to radians
-            end_point_x = self.radar_circle_center[0] + np.sin(angle_rad) * self.radar_radius
-            end_point_y = self.radar_circle_center[1] + np.cos(angle_rad) * self.radar_radius
-            pygame.draw.line(self.SCREEN, self.COLORS.get('green'), self.radar_circle_center,
-                             (int(end_point_x), int(end_point_y)), width=int(8.4 / self.SCALING))
+            angle_rad = np.radians(45 * i)
+            end_point_x = self.radar_properties["circle_center"][0] + np.sin(angle_rad) * self.radar_properties["radius"]
+            end_point_y = self.radar_properties["circle_center"][1] + np.cos(angle_rad) * self.radar_properties["radius"]
+            pygame.draw.line(self.SCREEN, self.COLORS['green'], self.radar_properties["circle_center"], (int(end_point_x), int(end_point_y)), width=int(8.4 / self.SCALING))
 
     def make_tracker(self):
         """
-        Function to let the tracker dot appear on the screen
-        :return: Nothing
+        Draw the tracker on the radar.
         """
         tracker_x_pos, tracker_y_pos = self.tracking.make_coordinates(self.SCALING)
-        tracker_center = (int(tracker_x_pos + self.radar_circle_center[0]),
-                          int(tracker_y_pos + self.radar_circle_center[1]))
+        tracker_center = (int(tracker_x_pos + self.radar_properties["circle_center_x"]), int(tracker_y_pos + self.radar_properties["circle_center_y"]))
         tracker_radius = 25 / self.SCALING
-        pygame.draw.circle(self.SCREEN, self.COLORS.get('red'), tracker_center, tracker_radius)
+        pygame.draw.circle(self.SCREEN, self.COLORS['red'], tracker_center, tracker_radius)
+
 
     def make_time_block(self, stopwatch):
         """
@@ -215,7 +212,7 @@ class GUI:
         Function to add the menu icon to the screen
         :return: Nothing
         """
-        menu_image_scaled = pygame.transform.scale(self.menu_image, (55, 50))
+        menu_image_scaled = pygame.transform.scale(self.pictograms["menu_image"], (55, 50))
         menu_rect = menu_image_scaled.get_rect(topleft=(48 / self.SCALING, 30 / self.SCALING))
         self.menu_button = menu_rect
 
@@ -398,7 +395,7 @@ class GUI:
         Make the back button
         :return: Nothing
         """
-        back_image_scaled = pygame.transform.scale(self.back_image, (60, 50))
+        back_image_scaled = pygame.transform.scale(self.pictograms["back_image"], (60, 50))
         back_rect = back_image_scaled.get_rect(topleft=(48 / self.SCALING, 30 / self.SCALING))
         self.back_button = back_rect
 
