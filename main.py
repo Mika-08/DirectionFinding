@@ -18,7 +18,7 @@ import Receiver
 def main():
     """
     Main function of the program
-    :return:
+    :return: Nothing
     """
 
     # t1 = threading.Thread(target=get_signal, name='Signal_thread')

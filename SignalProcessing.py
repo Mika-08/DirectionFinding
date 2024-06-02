@@ -18,6 +18,8 @@ class SignalProcessing:
         self.rx2 = Receiver.Receiver(self.center_freq, self.sample_rate, device_index=1)
         self.reference_signal = ReferenceSignal.ReferenceSignal(self.sample_rate)
 
+        self.past_data = []
+
     def disable_receiving(self):
         """
         Function to let the sdr dongles receive
@@ -26,6 +28,9 @@ class SignalProcessing:
         self.rx1.stop_receiving()
         self.rx2.stop_receiving()
 
+        self.save_data()
+        self.past_data = []
+
     def enable_receiving(self):
         """
         Function to let the sdr dongles stop with receiving
@@ -33,6 +38,17 @@ class SignalProcessing:
         """
         self.rx1.start_receiving()
         self.rx2.start_receiving()
+
+    def save_data(self):
+        """
+        Function to save the last tracking to a file
+        :return: Nothing
+        """
+        print(self.past_data)
+        output_file = open("Output.txt", "w")
+        for data in self.past_data:
+            output_file.write(str(data))
+            output_file.write("\n")
 
     def calculate_phase_cross_correlation(self, received_samples):
         """
@@ -94,13 +110,31 @@ class SignalProcessing:
         if angle_of_arrival_degrees < 0:
             angle_of_arrival_degrees += 360
 
+        if len(self.past_data) > 0:
+            angle_of_arrival_degrees = self.adjust_aoa(angle_of_arrival_degrees)
 
-        aoa = 270
         print(angle_of_arrival_degrees)
 
+        self.past_data.append(angle_of_arrival_degrees)
         return angle_of_arrival_degrees
 
+    def adjust_aoa(self, aoa):
+        """
+        Function to account for 180 phase ambiguity
+        :param aoa: calculated aoa
+        :return: adjusted aoa
+        """
+        previous_aoa = self.past_data[-1]
+        if (np.abs(aoa - previous_aoa)) > 30:
+            print("Big difference")
+
+        return aoa
+
     def calculate_distance(self):
+        """
+        Function to calculate the distance to the receiver using the RSSI
+        :return: Distance
+        """
         distance = 250
 
         return distance
