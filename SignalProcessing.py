@@ -43,7 +43,7 @@ class SignalProcessing:
         # Downsample the received samples and the reference signal by a factor
         downsample_factor = 150
         downsampled_samples = received_samples[::downsample_factor]
-        downsampled_reference = self.reference_signal[:len(downsampled_samples)]
+        downsampled_reference = self.reference_signal.signal[:len(downsampled_samples)]
 
         # Cross-correlate the complex IQ data
         correlation = np.correlate(downsampled_samples, downsampled_reference, mode='full')
@@ -55,6 +55,10 @@ class SignalProcessing:
         return phase_difference
 
     def calculate_delta_phi(self):
+        """
+        Function to calculate the phase difference between the two received signals
+        :return: delta_phi, the phase difference
+        """
         # Get samples
         samples1 = self.rx1.get_samples()
         samples2 = self.rx2.get_samples()
@@ -68,13 +72,33 @@ class SignalProcessing:
 
         delta_phi = phase_difference_degrees_1 - phase_difference_degrees_2
 
+        return delta_phi
 
-    def calculate_aoa(self, delta_phi):
-        theta = np.arcsin(delta_phi/np.pi)
+    def calculate_aoa(self):
+        """
+        Function to calculate the angle of arrival with the delta_phi
+        :return: Angle of arrival
+        """
+        delta_phi = self.calculate_delta_phi()
+        # Ensure the phase difference is within the range [-pi, pi]
+        delta_phi = np.arctan2(np.sin(delta_phi), np.cos(delta_phi))
+
+        # Calculate the angle of arrival
+        sin_theta = delta_phi / np.pi
+        # Ensure sin_theta is in the valid range [-1, 1]
+        sin_theta = np.clip(sin_theta, -1, 1)
+        angle_of_arrival = np.arcsin(sin_theta)
+        # Convert to degrees
+        angle_of_arrival_degrees = np.rad2deg(angle_of_arrival)
+
+        if angle_of_arrival_degrees < 0:
+            angle_of_arrival_degrees += 360
+
 
         aoa = 270
+        print(angle_of_arrival_degrees)
 
-        return aoa
+        return angle_of_arrival_degrees
 
     def calculate_distance(self):
         distance = 250

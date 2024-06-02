@@ -103,7 +103,15 @@ def update(frame):
             phase_data_2.pop(0)
 
         line2.set_data(np.linspace(-duration, 0, len(phase_data_2)), phase_data_2)
-        print(phase_difference_degrees_1 - phase_difference_degrees_2)
+
+        delta_phi = phase_difference_degrees_1 - phase_difference_degrees_2
+
+        theta = np.arcsin(delta_phi / np.pi)
+
+        # Convert to degrees between 0 and 180
+        theta = np.degrees(theta) + 90
+
+        print(theta)
 
     return line1, line2
 
