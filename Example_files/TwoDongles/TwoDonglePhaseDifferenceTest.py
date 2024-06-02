@@ -64,6 +64,7 @@ ax2.set_ylabel('Phase Difference (degrees)')
 ax2.set_title('Phase Difference - RTL-SDR 2')
 ax2.legend(loc='upper right')
 
+
 def init():
     """
     Initialize the plot
@@ -102,10 +103,6 @@ def update(frame):
             phase_data_2.pop(0)
 
         line2.set_data(np.linspace(-duration, 0, len(phase_data_2)), phase_data_2)
-
-
-
-
         print(phase_difference_degrees_1 - phase_difference_degrees_2)
 
     return line1, line2

@@ -29,6 +29,11 @@ def main():
     gui = GUI.GUI(scaling)
     gui.init_window()
     pygame.display.update()
+
+    # Sketchy, but it works
+    if not gui.states["dummy_mode"]:
+        gui.tracking.enable_antennas()
+
     # t1.start()
 
     running = True

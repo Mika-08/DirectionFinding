@@ -16,14 +16,18 @@ class GUI:
         self.HEIGHT = 2 * self.WIDTH / 3
         self.SCREEN = None
 
-        self.stopwatch = Stopwatch.Stopwatch()
-        self.tracking = Tracking.Tracking()
-
         self.states = {
             "stopwatch_is_enabled": True,
             "tracking_is_enabled": True,
-            "menu": False
+            "menu": False,
+            # Make true if not antennas are connected
+            "dummy_mode": False
         }
+
+        self.stopwatch = Stopwatch.Stopwatch()
+
+        if not self.states["dummy_mode"]:
+            self.tracking = Tracking.Tracking()
 
         pygame.font.init()
         self.MAIN_FONT = 'freesansbold.ttf'
@@ -110,12 +114,14 @@ class GUI:
 
     def make_tracker(self):
         """
-        Draw the tracker on the radar.
+        Funtion to draw the tracker location on the screen
+        :return: Nothing
         """
-        tracker_x_pos, tracker_y_pos = self.tracking.make_coordinates(self.SCALING)
-        tracker_center = (int(tracker_x_pos + self.radar_properties["circle_center_x"]), int(tracker_y_pos + self.radar_properties["circle_center_y"]))
-        tracker_radius = 25 / self.SCALING
-        pygame.draw.circle(self.SCREEN, self.COLORS['red'], tracker_center, tracker_radius)
+        if not self.states["dummy_mode"]:
+            tracker_x_pos, tracker_y_pos = self.tracking.make_coordinates(self.SCALING)
+            tracker_center = (int(tracker_x_pos + self.radar_properties["circle_center_x"]), int(tracker_y_pos + self.radar_properties["circle_center_y"]))
+            tracker_radius = 25 / self.SCALING
+            pygame.draw.circle(self.SCREEN, self.COLORS['red'], tracker_center, tracker_radius)
 
     def make_time_block(self, stopwatch):
         """
@@ -428,9 +434,13 @@ class GUI:
 
             if self.tracking_button.collidepoint(mouse_pos) and self.states["tracking_is_enabled"]:
                 self.states["tracking_is_enabled"] = False
+                if not self.states["dummy_mode"]:
+                    self.tracking.disable_antennas()
 
             elif self.tracking_button.collidepoint(mouse_pos) and not self.states["tracking_is_enabled"]:
                 self.states["tracking_is_enabled"] = True
+                if not self.states["dummy_mode"]:
+                    self.tracking.enable_antennas()
 
             if self.stopwatch_button.collidepoint(mouse_pos) and self.states["stopwatch_is_enabled"]:
                 self.states["stopwatch_is_enabled"] = False
@@ -470,6 +480,8 @@ class GUI:
         for event in pygame.event.get():
             mouse_pos = pygame.mouse.get_pos()
             if event.type == pygame.QUIT:
+                if not self.states["dummy_mode"]:
+                    self.tracking.disable_antennas()
                 return False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 self.check_buttons(mouse_pos)

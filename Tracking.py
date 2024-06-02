@@ -11,12 +11,26 @@ class Tracking:
         self.angle_of_arrival = None
         self.distance = None
 
+    def enable_antennas(self):
+        """
+        Function to enable the receiving antennas
+        :return: Nothing
+        """
+        self.signal_processing.enable_receiving()
+
+    def disable_antennas(self):
+        """
+        Function to disable the receiving antennas
+        :return: Nothing
+        """
+        self.signal_processing.disable_receiving()
+
     def get_signal_information(self):
         """
         Function for getting the information from the signal processing object
         :return: Nothing
         """
-        self.angle_of_arrival = self.signal_processing.calculate_aoa()
+        self.angle_of_arrival = self.signal_processing.calculate_aoa(0.3)
         self.distance = self.signal_processing.calculate_distance()
 
     def make_coordinates(self, scaling):
