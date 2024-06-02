@@ -35,12 +35,17 @@ class SignalProcessing:
 
         return phase_difference
 
-    def create_aoa(self):
+    def calculate_delta_phi(self):
+        return -1
+
+    def calculate_aoa(self, delta_phi):
+        theta = np.arcsin(delta_phi/np.pi)
+
         aoa = 270
 
         return aoa
 
-    def create_distance(self):
+    def calculate_distance(self):
         distance = 250
 
         return distance

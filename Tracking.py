@@ -16,8 +16,8 @@ class Tracking:
         Function for getting the information from the signal processing object
         :return: Nothing
         """
-        self.angle_of_arrival = self.signal_processing.create_aoa()
-        self.distance = self.signal_processing.create_distance()
+        self.angle_of_arrival = self.signal_processing.calculate_aoa()
+        self.distance = self.signal_processing.calculate_distance()
 
     def make_coordinates(self, scaling):
         """

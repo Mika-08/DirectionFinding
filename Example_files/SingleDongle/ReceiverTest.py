@@ -92,6 +92,7 @@ def update(frame):
     :return: The line to plot
     """
     samples = receiver.get_samples()
+    print(samples)
     if samples is not None:
         # Compute the signal power
         power = np.abs(samples) ** 2
