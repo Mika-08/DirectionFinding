@@ -3,9 +3,14 @@ import numpy as np
 
 class ReferenceSignal:
     def __init__(self, sample_rate):
+        """
+        Constructor function for the reference signal class
+        :param sample_rate: Sample rate with which the dongles sample
+        """
         self.signal = None
         self.sample_rate = sample_rate
         self.gold_code = [1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0]
+        self.create_reference_signal()
 
     def create_reference_signal(self):
         """
