@@ -2,6 +2,7 @@ import numpy as np
 import threading
 from rtlsdr import RtlSdr
 
+
 class Receiver:
     def __init__(self, center_freq, sample_rate, gain='auto', device_index=0):
         """
@@ -60,5 +61,3 @@ class Receiver:
         """
         with self.sample_lock:
             return self.samples
-
-

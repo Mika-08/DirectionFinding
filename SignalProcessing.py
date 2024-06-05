@@ -4,6 +4,12 @@ import Receiver
 import ReferenceSignal
 
 
+def synchronize_signals(samples1, samples2):
+    # Todo: synchronize the dongles
+
+    return samples1, samples2
+
+
 class SignalProcessing:
     def __init__(self):
         """
@@ -79,14 +85,17 @@ class SignalProcessing:
         samples1 = self.rx1.get_samples()
         samples2 = self.rx2.get_samples()
 
+        # Synchronize antennas
+        samples1, samples2 = synchronize_signals(samples1, samples2)
+
         # Calculate phase difference
-        phase_difference_1 = self.calculate_phase_cross_correlation(samples1)
-        phase_difference_degrees_1 = np.degrees(phase_difference_1)  # Convert radians to degrees
+        phase_difference1 = self.calculate_phase_cross_correlation(samples1)
+        phase_difference_degrees1 = np.degrees(phase_difference1)  # Convert radians to degrees
 
-        phase_difference_2 = self.calculate_phase_cross_correlation(samples2)
-        phase_difference_degrees_2 = np.degrees(phase_difference_2)  # Convert radians to degrees
+        phase_difference2 = self.calculate_phase_cross_correlation(samples2)
+        phase_difference_degrees2 = np.degrees(phase_difference2)  # Convert radians to degrees
 
-        delta_phi = phase_difference_degrees_1 - phase_difference_degrees_2
+        delta_phi = phase_difference_degrees1 - phase_difference_degrees2
 
         return delta_phi
 
@@ -124,9 +133,18 @@ class SignalProcessing:
         :param aoa: calculated aoa
         :return: adjusted aoa
         """
+        new_aoa = aoa
+
+        # Does not work yet
         previous_aoa = self.past_data[-1]
         if (np.abs(aoa - previous_aoa)) > 30:
-            print("Big difference")
+            if previous_aoa >= 45:
+                new_aoa = aoa - 180
+                print("decrease")
+
+            elif 270 <= previous_aoa <= 315:
+                new_aoa = aoa + 180
+                print("add")
 
         return aoa
 

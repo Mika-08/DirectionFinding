@@ -10,7 +10,22 @@ class ReferenceSignal:
         self.signal = None
         self.sample_rate = sample_rate
         self.gold_code = [1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0]
-        self.create_reference_signal()
+        self.create_reference_signal_gold_code()
+
+    def create_reference_signal_gold_code(self):
+        signal = []
+        bit_time = 0.01613
+
+        bit_duration = int(bit_time * self.sample_rate)
+
+        for value in self.gold_code:
+            if value == 1:
+                signal.append(np.ones(bit_duration))
+            else:
+                signal.append(np.zeros(bit_duration))
+
+        # Concatenate the list of arrays into a single array
+        self.signal = np.concatenate(signal)
 
     def create_reference_signal(self):
         """
@@ -29,7 +44,6 @@ class ReferenceSignal:
         ])
 
         # Repeat the pattern to ensure it's long enough
-        repeat_count = int(np.ceil(self.sample_rate / len(reference_signal)))
-        reference_signal = np.tile(reference_signal, repeat_count)
+        reference_signal = np.tile(reference_signal, 100)
 
         self.signal = reference_signal
