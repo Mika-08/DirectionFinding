@@ -30,8 +30,8 @@ off_duration_long = int(0.91 * sample_rate)
 ref = np.concatenate([
     np.ones(on_duration),
     np.zeros(off_duration_short),
-    np.ones(on_duration),
-    np.zeros(off_duration_long)
+    np.ones(on_duration)
+    # np.zeros(off_duration_long)
 ])
 
 
@@ -194,3 +194,5 @@ print(F"The time difference between the reference and the shifted signal is: {de
 
 delay3 = time_delay(modulated_ref, shifted, shifted2)
 print(F"The time difference between the two shifted signals is: {delay3} seconds.")
+
+plot(modulated_ref, shifted, shifted2)
