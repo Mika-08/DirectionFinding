@@ -5,23 +5,27 @@ import matplotlib.pyplot as plt
 import Receiver
 import sys
 
-
-def plot(signal1, signal2, signal3):
-    y1 = np.arange(0, len(signal1))
-    y2 = np.arange(0, len(signal2))
-    y3 = np.arange(0, len(signal3))
-
-    plt.plot(y1, signal1, label="1")
-    plt.plot(y2, signal2, label="2")
-    plt.plot(y3, signal3, label="3")
-    plt.legend()
-    plt.show()
-
-
 center_freq = 434e6
 sample_rate = 2.048e6
 duration = 5  # Duration in seconds
 wavelength = 3e8 / center_freq  # Speed of light divided by center frequency
+
+
+def plot(signal1, signal2, signal3, phase):
+    y1 = np.arange(0, len(signal1))/1000000
+    y2 = np.arange(0, len(signal2))/1000000
+    y3 = np.arange(0, len(signal3))/1000000
+
+    plt.plot(y1, np.abs(signal1), label="Reference signal")
+    plt.plot(y2, np.abs(signal2), label="Shifted signal 1, 0.05 s")
+    plt.plot(y3, np.abs(signal3), label="Shifted signal 2, 0.08 s")
+    plt.legend()
+    plt.title(F"Reference signal and two shifted signals \n"
+              F"Calculated phase difference between the two signals: {phase:.01f} degrees.")
+    plt.ylabel("Amplitude")
+    plt.xlabel("Time (s)")
+    plt.show()
+
 
 on_duration = int(0.03 * sample_rate)
 off_duration_short = int(0.03 * sample_rate)
@@ -30,8 +34,8 @@ off_duration_long = int(0.91 * sample_rate)
 ref = np.concatenate([
     np.ones(on_duration),
     np.zeros(off_duration_short),
-    np.ones(on_duration)
-    # np.zeros(off_duration_long)
+    np.ones(on_duration),
+    np.zeros(off_duration_long)
 ])
 
 
@@ -98,6 +102,10 @@ def makePeak(ref, samples1):
     # print(td)
     est_delay = td[np.argmax(np.abs(ifft))] * downsampling_factor
 
+    T = 1
+    phase_delay = 2 * np.pi * 1/T * est_delay
+    phase_delay_degrees = np.rad2deg(phase_delay)
+
     # fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(8, 8))
     #
     # ax.plot(td, np.abs(ifft))
@@ -109,7 +117,7 @@ def makePeak(ref, samples1):
     # fig.tight_layout()
     # plt.show()
 
-    return est_delay
+    return est_delay, phase_delay
 
 
 def time_delay(ref, samples1, samples2):
@@ -156,7 +164,11 @@ def time_delay(ref, samples1, samples2):
 
     # plot(ref, samples1, mult1)
 
-    return est_delay
+    T = 1
+    phase_delay = 2 * np.pi * 1/T * est_delay
+    phase_delay_degrees = np.rad2deg(phase_delay)
+
+    return est_delay, phase_delay
 
 def makeNoise(signal):
     target_snr_db = 20
@@ -178,21 +190,24 @@ def makeNoise(signal):
 
 modulated_ref = makeSignal(ref, sample_rate)
 
-shifted = addTimeShift(modulated_ref, 0.005, sample_rate)
-shifted2 = addTimeShift(modulated_ref, 0.008, sample_rate)
+shifted = addTimeShift(modulated_ref, 0.05, sample_rate)
+shifted2 = addTimeShift(modulated_ref, 0.08, sample_rate)
 
-shifted = makeNoise(shifted)
-shifted2 = makeNoise(shifted2)
+# shifted = makeNoise(shifted)
+# shifted2 = makeNoise(shifted2)
 
 # plot(ref, shifted, shifted2)
 
-delay1 = makePeak(modulated_ref, shifted)
-print(F"The time difference between the reference and the shifted signal is: {delay1} seconds.")
+delay1, phase1 = makePeak(modulated_ref, shifted)
+print(F"The time difference between the reference and the shifted signal is: {delay1} seconds."
+      F" The phase difference is: {np.rad2deg(phase1)} degrees.")
 
-delay2 = makePeak(modulated_ref, shifted2)
-print(F"The time difference between the reference and the shifted signal is: {delay2} seconds.")
+delay2, phase2 = makePeak(modulated_ref, shifted2)
+print(F"The time difference between the reference and the shifted signal is: {delay2} seconds."
+      F" The phase difference is: {np.rad2deg(phase2)} degrees.")
 
-delay3 = time_delay(modulated_ref, shifted, shifted2)
-print(F"The time difference between the two shifted signals is: {delay3} seconds.")
+delay3, phase3 = time_delay(modulated_ref, shifted, shifted2)
+print(F"The time difference between the two shifted signals is: {delay3} seconds."
+      F" The phase difference is: {np.rad2deg(phase3)} degrees.")
 
-plot(modulated_ref, shifted, shifted2)
+plot(modulated_ref, shifted, shifted2, np.rad2deg(phase3))

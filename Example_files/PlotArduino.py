@@ -14,14 +14,8 @@ reference_signal = np.concatenate([
     np.zeros(off_duration_long)
 ])
 
-print(np.shape(reference_signal))
-
 # Repeat the pattern to ensure it's long enough
 reference_signal = np.tile(reference_signal, 5)
-
-# np.set_printoptions(100)
-print(reference_signal)
-
 
 
 # Plot the reference signal, phase-shifted signal, and the calculated phase shift
@@ -29,14 +23,12 @@ plt.figure(figsize=(12, 6))
 t = np.arange(0, len(reference_signal))
 
 # Plot reference signal
-plt.plot(t, np.real(reference_signal), label='Reference Signal (Real Part)', alpha=0.75)
+plt.plot(t, np.real(reference_signal), alpha=0.75)
 
 
 plt.title('Ideal arduino signal')
 plt.xlabel('Samples')
 plt.ylabel('Amplitude')
-# plt.legend(loc='upper right')
-# plt.grid()
 plt.tight_layout()
 plt.show()
 
