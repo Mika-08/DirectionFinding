@@ -1,9 +1,7 @@
 import numpy as np
-import scipy
 import matplotlib.pyplot as plt
 import Receiver
 from matplotlib.animation import FuncAnimation
-import time
 
 center_freq = 434e6
 sample_rate = 2.048e6
