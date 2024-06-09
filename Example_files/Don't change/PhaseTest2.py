@@ -1,9 +1,7 @@
 import numpy as np
 import scipy
-from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
-import Receiver
-import sys
+
 
 center_freq = 434e6
 sample_rate = 2.048e6
@@ -75,6 +73,12 @@ def addTimeShift(s, t0, sample_rate):
 
 
 def zero_pad_array(arr, desired_length):
+    """
+    Function that adds additional zeros to the array
+    :param arr: Array to be altered
+    :param desired_length: Length which the altered array needs to be
+    :return: The altered array
+    """
     current_length = len(arr)
     if current_length < desired_length:
         padding = desired_length - current_length
@@ -83,6 +87,12 @@ def zero_pad_array(arr, desired_length):
 
 
 def makePeak(ref, samples1):
+    """
+    Function to calculate the time difference and phase difference between the received signal and the reference signal
+    :param ref: Reference signal
+    :param samples1: Received signal
+    :return: The time delay and phase difference
+    """
     downsampling_factor = 1
     ref = ref[::downsampling_factor]
     samples1 = samples1[::downsampling_factor]
@@ -121,6 +131,13 @@ def makePeak(ref, samples1):
 
 
 def time_delay(ref, samples1, samples2):
+    """
+    Function to calculate the time difference and phase difference between two signal
+    :param ref: Reference signal
+    :param samples1: Received signal 1
+    :param samples2: Received signal 2
+    :return: The time difference and phase difference
+    """
     downsampling_factor = 1
     ref = ref[::downsampling_factor]
     samples1 = samples1[::downsampling_factor]
@@ -185,7 +202,7 @@ def makeNoise(signal):
     noise_volts = np.random.normal(mean_noise, np.sqrt(noise_avg_watts), len(x_watts))
 
     # Add the noise to the data.
-    return signal + noise_volts  # Since both y and noise are numpy arrays of same size, the addition is done element-wise.
+    return signal + noise_volts
 
 
 modulated_ref = makeSignal(ref, sample_rate)
@@ -193,8 +210,8 @@ modulated_ref = makeSignal(ref, sample_rate)
 shifted = addTimeShift(modulated_ref, 0.05, sample_rate)
 shifted2 = addTimeShift(modulated_ref, 0.08, sample_rate)
 
-# shifted = makeNoise(shifted)
-# shifted2 = makeNoise(shifted2)
+shifted = makeNoise(shifted)
+shifted2 = makeNoise(shifted2)
 
 # plot(ref, shifted, shifted2)
 
@@ -209,5 +226,8 @@ print(F"The time difference between the reference and the shifted signal is: {de
 delay3, phase3 = time_delay(modulated_ref, shifted, shifted2)
 print(F"The time difference between the two shifted signals is: {delay3} seconds."
       F" The phase difference is: {np.rad2deg(phase3)} degrees.")
+
+aoa = np.arcsin(phase3/np.pi)
+print(F"The angle of arrival is {np.rad2deg(aoa)} degrees.")
 
 plot(modulated_ref, shifted, shifted2, np.rad2deg(phase3))
