@@ -1,5 +1,19 @@
 import numpy as np
 
+def makeSignal(ref, sample_rate):
+    # Define the carrier frequency
+    carrier_frequency = 434  # 343 MHz
+
+    # Generate the time vector for the base signal
+    t = np.arange(len(ref)) / sample_rate
+
+    # Generate the carrier signal
+    carrier_signal = np.cos(2 * np.pi * carrier_frequency * t)
+
+    # Modulate the base signal with the carrier
+    modulated_signal = ref * carrier_signal
+
+    return modulated_signal
 
 class ReferenceSignal:
     def __init__(self, sample_rate):
@@ -10,7 +24,7 @@ class ReferenceSignal:
         self.signal = None
         self.sample_rate = sample_rate
         self.gold_code = [1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0]
-        self.create_reference_signal_gold_code()
+        self.create_reference_signal()
 
     def create_reference_signal_gold_code(self):
         signal = []
@@ -43,7 +57,6 @@ class ReferenceSignal:
             np.zeros(off_duration_long)
         ])
 
-        # Repeat the pattern to ensure it's long enough
-        reference_signal = np.tile(reference_signal, 100)
+        modulated_ref = makeSignal(reference_signal, self.sample_rate)
 
-        self.signal = reference_signal
+        self.signal = modulated_ref

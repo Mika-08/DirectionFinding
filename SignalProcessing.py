@@ -2,12 +2,63 @@ import Kalman
 import numpy as np
 import Receiver
 import ReferenceSignal
+import scipy
 
 
-def synchronize_signals(samples1, samples2):
-    # Todo: synchronize the dongles
+def zero_pad_array(arr, desired_length):
+    """
+    Function that adds additional zeros to the array
+    :param arr: Array to be altered
+    :param desired_length: Length which the altered array needs to be
+    :return: The altered array
+    """
+    current_length = len(arr)
+    if current_length < desired_length:
+        padding = desired_length - current_length
+        arr = np.pad(arr, (0, padding), 'constant', constant_values=(0,))
+    return arr
 
-    return samples1, samples2
+
+def time_delay(ref, samples1, samples2, sample_rate):
+    """
+    Function to calculate the time difference and phase difference between two signal
+    :param ref: Reference signal
+    :param samples1: Received signal 1
+    :param samples2: Received signal 2
+    :return: The time difference and phase difference
+    """
+
+    downsampling_factor = 1
+    ref = ref[::downsampling_factor]
+    samples1 = samples1[::downsampling_factor]
+    samples2 = samples2[::downsampling_factor]
+
+    length_ref = len(ref)
+    length_samples = len(samples1)
+
+    total_length = length_ref + length_samples - 1
+
+    ref = zero_pad_array(ref, total_length)
+    samples1 = zero_pad_array(samples1, total_length)
+    samples2 = zero_pad_array(samples2, total_length)
+
+    mult1 = np.flip(scipy.fft.fft(np.conj(ref))) * scipy.fft.fft(samples1)
+    mult2 = np.flip(scipy.fft.fft(np.conj(ref))) * scipy.fft.fft(samples2)
+
+    if np.argmax(np.abs(scipy.fft.ifft(mult2))) > np.argmax(np.abs(scipy.fft.ifft(mult1))):
+        ifft = np.abs(scipy.fft.ifft(mult2 / mult1))
+
+    else:
+        ifft = np.abs(scipy.fft.ifft(mult1 / mult2))
+
+    td = np.linspace(0, total_length / sample_rate, total_length)
+    est_delay = (td[np.argmax(np.abs(ifft))] * downsampling_factor) % 1
+
+    T = 1
+    phase_delay = 2 * np.pi * 1 / T * est_delay
+    phase_delay_degrees = np.rad2deg(phase_delay)
+
+    return est_delay, phase_delay
 
 
 class SignalProcessing:
@@ -56,26 +107,6 @@ class SignalProcessing:
             output_file.write(str(data))
             output_file.write("\n")
 
-    def calculate_phase_cross_correlation(self, received_samples):
-        """
-        Function to calculate the phase of the received signal using cross-correlation with a reference signal
-        :param received_samples: The samples from the antenna's
-        :return: phase difference of the received signal
-        """
-        # Downsample the received samples and the reference signal by a factor
-        downsample_factor = 150
-        downsampled_samples = received_samples[::downsample_factor]
-        downsampled_reference = self.reference_signal.signal[:len(downsampled_samples)]
-
-        # Cross-correlate the complex IQ data
-        correlation = np.correlate(downsampled_samples, downsampled_reference, mode='full')
-        max_index = np.argmax(np.abs(correlation))
-
-        # Get the phase difference at the point of maximum correlation
-        phase_difference = np.angle(correlation[max_index])
-
-        return phase_difference
-
     def calculate_delta_phi(self):
         """
         Function to calculate the phase difference between the two received signals
@@ -85,17 +116,10 @@ class SignalProcessing:
         samples1 = self.rx1.get_samples()
         samples2 = self.rx2.get_samples()
 
-        # Synchronize antennas
-        samples1, samples2 = synchronize_signals(samples1, samples2)
+        modulated_ref = self.reference_signal.signal
 
-        # Calculate phase difference
-        phase_difference1 = self.calculate_phase_cross_correlation(samples1)
-        phase_difference_degrees1 = np.degrees(phase_difference1)  # Convert radians to degrees
-
-        phase_difference2 = self.calculate_phase_cross_correlation(samples2)
-        phase_difference_degrees2 = np.degrees(phase_difference2)  # Convert radians to degrees
-
-        delta_phi = phase_difference_degrees1 - phase_difference_degrees2
+        delay, phase = time_delay(modulated_ref, samples1, samples2, self.sample_rate)
+        delta_phi = phase
 
         return delta_phi
 
@@ -116,37 +140,37 @@ class SignalProcessing:
         # Convert to degrees
         angle_of_arrival_degrees = np.rad2deg(angle_of_arrival)
 
-        if angle_of_arrival_degrees < 0:
-            angle_of_arrival_degrees += 360
-
-        if len(self.past_data) > 0:
-            angle_of_arrival_degrees = self.adjust_aoa(angle_of_arrival_degrees)
+        # if angle_of_arrival_degrees < 0:
+        #     angle_of_arrival_degrees += 360
+        #
+        # if len(self.past_data) > 0:
+        #     angle_of_arrival_degrees = self.adjust_aoa(angle_of_arrival_degrees)
 
         print(angle_of_arrival_degrees)
 
         self.past_data.append(angle_of_arrival_degrees)
         return angle_of_arrival_degrees
 
-    def adjust_aoa(self, aoa):
-        """
-        Function to account for 180 phase ambiguity
-        :param aoa: calculated aoa
-        :return: adjusted aoa
-        """
-        new_aoa = aoa
-
-        # Does not work yet
-        previous_aoa = self.past_data[-1]
-        if (np.abs(aoa - previous_aoa)) > 30:
-            if previous_aoa >= 45:
-                new_aoa = aoa - 180
-                print("decrease")
-
-            elif 270 <= previous_aoa <= 315:
-                new_aoa = aoa + 180
-                print("add")
-
-        return aoa
+    # def adjust_aoa(self, aoa):
+    #     """
+    #     Function to account for 180 phase ambiguity
+    #     :param aoa: calculated aoa
+    #     :return: adjusted aoa
+    #     """
+    #     new_aoa = aoa
+    #
+    #     # Does not work yet
+    #     previous_aoa = self.past_data[-1]
+    #     if (np.abs(aoa - previous_aoa)) > 30:
+    #         if previous_aoa >= 45:
+    #             new_aoa = aoa - 180
+    #             print("decrease")
+    #
+    #         elif 270 <= previous_aoa <= 315:
+    #             new_aoa = aoa + 180
+    #             print("add")
+    #
+    #     return aoa
 
     def calculate_distance(self):
         """
